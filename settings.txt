@@ -1,0 +1,8 @@
+# path to your sprites, keep as the top variable!
+SPRITE_PATH = '/Users/21berntson_a/Documents/Programming/Python/Spaceship/Sprites/'
+
+# rules
+combine_asteroids = false
+flip_aim = false
+speed_up_when_loop = false
+asteroids_do_damage = true
