@@ -1,5 +1,5 @@
 # path to your sprites, keep as the top variable!
-SPRITE_PATH = '/Users/21berntson_a/Documents/Programming/Python/Spaceship/Sprites/'
+SPRITE_PATH = '.../Spaceship/Sprites/'
 
 # rules
 combine_asteroids = false

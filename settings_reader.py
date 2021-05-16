@@ -1,5 +1,5 @@
 def get_lines():
-    with open("/Users/21berntson_a/Documents/Programming/Python/Spaceship/settings.txt", "r") as file:
+    with open(".../Spaceship/settings.txt", "r") as file:
         lines = file.readlines()
     return lines
 
