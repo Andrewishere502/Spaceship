@@ -11,3 +11,7 @@ speed_up_when_loop
     Makes the asteroids speed up when they loop
     around the screen as a punishment for not
     killing it. Suggested by my mom!
+
+asteroids_do_damage
+    Toggles the ability of asteroids to do damage
+    to the spaceship.

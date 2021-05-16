@@ -1,4 +1,3 @@
-import random
 from math import sqrt, pi, cos, sin, acos
 
 import pygame
@@ -24,7 +23,7 @@ class Asteroid(pygame.sprite.Sprite):
 
     def reload_base_image(self):
         PATH = get_path()
-        sprite_image = PATH + "asteroid-{}.png".format(self.size)
+        sprite_image = PATH + "Asteroids/" + "asteroid-{}.png".format(self.size)
 
         self.base_image = pygame.image.load(sprite_image)
         self.base_image.set_alpha()

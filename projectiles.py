@@ -10,7 +10,7 @@ class Projectile(pygame.sprite.Sprite):
         self.base_pos = list(pos)
 
         PATH = get_path()
-        sprite_image = PATH + image
+        sprite_image = PATH + "Projectiles/" + image
 
         base_image = pygame.image.load(sprite_image)
         base_image.set_alpha()

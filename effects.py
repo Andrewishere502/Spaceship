@@ -64,12 +64,3 @@ class Explosion(Effect):
         frame_durration = 5
         super().__init__(pos, frames, frame_durration, frame_folder, scale=scale)
         return
-
-
-class Danger(Effect):
-    def __init__(self, pos):
-        frame_folder = "Danger/"
-        frames = ("danger-on.png", "danger-off.png")
-        frame_durration = 15
-        super().__init__(pos, frames, frame_durration, frame_folder, loop=True)
-        return

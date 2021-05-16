@@ -37,9 +37,6 @@ class Space(pygame.surface.Surface):
             self.spawn_asteroid()
 
         self.crates = []
-        # start_crates = 3
-        # for _ in range(start_crates):
-        #     self.spawn_random_crate()
 
         self.effects = []
 
@@ -418,12 +415,6 @@ class Space(pygame.surface.Surface):
             if effect.done:
                 self.effects.pop(i)
             else:
-                collide_i = effect.get_hitbox().collidelist(asteroid_hitboxes)
-                if collide_i > -1:  # effect hit an asteroid
-                    asteroid_point_val = self.asteroids[collide_i].point_value
-                    asteroid_hitboxes.pop(collide_i)
-                    self.asteroids.pop(collide_i)
-
                 i += 1
 
             if i == len(self.effects):

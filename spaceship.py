@@ -1,7 +1,7 @@
 import pygame
 
 from settings_reader import get_path
-from weapons import PhaseBlaster, IonRing#, PlasmaLauncher, IonFlak, AlloyCannon
+from weapons import PhaseBlaster
 
 
 class Spaceship(pygame.sprite.Sprite):
@@ -23,11 +23,7 @@ class Spaceship(pygame.sprite.Sprite):
         self.health = health
 
         self.weapons_array = [
-            PhaseBlaster(),
-            # PlasmaLauncher(),
-            # IonFlak(),
-            # AlloyCannon()
-            IonRing()
+            PhaseBlaster()
         ]
         self.weapon_index = 0
         self.score = 0

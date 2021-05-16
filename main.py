@@ -47,8 +47,6 @@ while run:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
                 space.reset_game()
-            elif event.key == pygame.K_RETURN:
-                space.spawn_asteroid()
             elif event.key == pygame.K_p:
                 if pause:
                     pause = False

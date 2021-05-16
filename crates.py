@@ -1,5 +1,3 @@
-import random
-
 import pygame
 
 from settings_reader import get_path
@@ -23,7 +21,7 @@ class Crate(pygame.sprite.Sprite):
 
     def reload_base_image(self):
         PATH = get_path()
-        sprite_image = PATH + self.image_name
+        sprite_image = PATH + "Crates/" + self.image_name
 
         self.base_image = pygame.image.load(sprite_image)
         self.base_image.set_alpha()
