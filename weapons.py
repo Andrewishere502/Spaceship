@@ -7,7 +7,7 @@ from projectiles import PhaserProjectile, PlasmaProjectile, IonProjectile, Alloy
 
 class Gun:
     def __init__(self, weapon_name, image_name, max_ammo):
-        sprite_path = get_path() + "Weapons/" + image_name
+        sprite_path = get_path() / "Weapons" / image_name
         self.name = weapon_name
         self.image = pygame.image.load(sprite_path)
         self.max_ammo = max_ammo

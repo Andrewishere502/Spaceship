@@ -9,7 +9,7 @@ class Spaceship(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.base_pos = list(pos)
 
-        sprite_image = get_path() + "spaceship-2.png"
+        sprite_image = get_path() / "spaceship-2.png"
 
         self.base_image = pygame.image.load(sprite_image)
         self.base_image.set_alpha()

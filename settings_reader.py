@@ -1,5 +1,8 @@
+import pathlib
+
+
 def get_lines():
-    with open(".../Spaceship/settings.txt", "r") as file:
+    with open("settings.txt", "r") as file:
         lines = file.readlines()
     return lines
 
@@ -76,7 +79,7 @@ def get_path():
     remove_meaningless_lines(lines)
     path = lines[0].split(" = ")[1]
     path = path[1:-1]  # remove ''
-    return path
+    return pathlib.Path(path)
 
 
 if __name__ == "__main__":

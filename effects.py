@@ -7,9 +7,8 @@ class Effect:
     def __init__(self, pos, frames, frame_durration, frame_folder, scale=1, loop=False):
         self.pos = list(pos)
 
-        PATH = get_path() + frame_folder
         # frames should all be the same size!
-        self.frames = tuple(map(lambda file_name: PATH + file_name, frames))
+        self.frames = tuple(map(lambda file_name: get_path() / frame_folder / file_name, frames))
 
         self.current_frame = 0
         self.end_frame = len(frames)
@@ -59,8 +58,7 @@ class Effect:
 
 class Explosion(Effect):
     def __init__(self, pos, scale):
-        frame_folder = "Explosion/"
         frames = ("1.png", "2.png", "3.png", "4.png", "5.png", "6.png")
         frame_durration = 5
-        super().__init__(pos, frames, frame_durration, frame_folder, scale=scale)
+        super().__init__(pos, frames, frame_durration, "Explosion", scale=scale)
         return
