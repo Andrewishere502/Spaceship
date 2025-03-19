@@ -29,6 +29,13 @@ class Display:
 pygame.init()
 pygame.font.init()
 
+# Create an instance of the clock class to help control maximum frame rate
+clock = pygame.time.Clock()
+FPS = 60 # Maximum frames per second
+
+# NOTE:
+# An object moving 1 px per tick is moving FPS px per second.
+
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
 
@@ -39,8 +46,6 @@ space.reset_game()
 pause = False
 run = True
 while run:
-    pygame.time.delay(10)  # the real time this loop takes is delay + 10 to + 20
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -88,4 +93,8 @@ while run:
 
     display.blit(space, (0, 0))
     display.update()
+
+    # Cap the frame rate to FPS frames per second. Frames can take longer
+    # if the frame takes a long time to compute.
+    clock.tick(FPS)
 pygame.quit()

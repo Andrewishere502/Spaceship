@@ -15,7 +15,7 @@ class Spaceship(pygame.sprite.Sprite):
         self.base_image.set_alpha()
 
         self.vel = [0, 0]  # in px/tick
-        self.max_vel_component = 9
+        self.max_vel_component = 7
 
         self.angular_pos = 0  # in degrees
 
