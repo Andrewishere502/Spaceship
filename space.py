@@ -41,7 +41,6 @@ class Space(pygame.surface.Surface):
         self.effects = []
 
         self.clear()
-        self.update()
         return
 
     def check_setting(self, name, default):
@@ -240,11 +239,6 @@ class Space(pygame.surface.Surface):
         if self.spaceship.is_alive:
             self.draw_spaceship()
         self.draw_effects()
-        return
-
-    @staticmethod
-    def update():
-        pygame.display.update()
         return
 
     ##

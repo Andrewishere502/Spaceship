@@ -11,8 +11,7 @@ class Projectile(pygame.sprite.Sprite):
 
         sprite_image = get_path() / "Projectiles" / image
 
-        base_image = pygame.image.load(sprite_image)
-        base_image.set_alpha()
+        base_image = pygame.image.load(sprite_image).convert_alpha()
         self.base_width = base_image.get_width()
         self.base_height = base_image.get_height()
         self.image = pygame.transform.rotate(base_image, angular_pos)

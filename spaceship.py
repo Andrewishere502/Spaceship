@@ -11,8 +11,7 @@ class Spaceship(pygame.sprite.Sprite):
 
         sprite_image = get_path() / "spaceship-2.png"
 
-        self.base_image = pygame.image.load(sprite_image)
-        self.base_image.set_alpha()
+        self.base_image = pygame.image.load(sprite_image).convert_alpha()
 
         self.vel = [0, 0]  # in px/tick
         self.max_vel_component = 7

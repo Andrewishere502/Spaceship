@@ -22,8 +22,7 @@ class Crate(pygame.sprite.Sprite):
     def reload_base_image(self):
         sprite_image = get_path() / "Crates" / self.image_name
 
-        self.base_image = pygame.image.load(sprite_image)
-        self.base_image.set_alpha()
+        self.base_image = pygame.image.load(sprite_image).convert_alpha()
         return
 
     @property

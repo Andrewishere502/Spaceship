@@ -24,8 +24,7 @@ class Asteroid(pygame.sprite.Sprite):
     def reload_base_image(self):
         sprite_image = get_path() / "Asteroids" / "asteroid-{}.png".format(self.size)
 
-        self.base_image = pygame.image.load(sprite_image)
-        self.base_image.set_alpha()
+        self.base_image = pygame.image.load(sprite_image).convert_alpha()
         return
 
     @property

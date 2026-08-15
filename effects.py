@@ -41,7 +41,7 @@ class Effect:
 
     def get_frame(self):
         frame = self.frames[self.current_frame]
-        image = pygame.image.load(frame)
+        image = pygame.image.load(frame).convert_alpha()
         if self.scale != 1:
             image = pygame.transform.scale(image, (round(image.get_width() * self.scale),
                                                    round(image.get_height() * self.scale)))

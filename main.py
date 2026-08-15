@@ -26,18 +26,16 @@ class Display:
         return
 
 
+FPS = 60 # Maximum frames per second
+
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 600
+
 pygame.init()
 pygame.font.init()
 
 # Create an instance of the clock class to help control maximum frame rate
 clock = pygame.time.Clock()
-FPS = 60 # Maximum frames per second
-
-# NOTE:
-# An object moving 1 px per tick is moving FPS px per second.
-
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 600
 
 display = Display(SCREEN_WIDTH, SCREEN_HEIGHT)
 space = Space(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -89,7 +87,6 @@ while run:
 
         space.clear()
         space.draw_all()
-        space.update()
 
     display.blit(space, (0, 0))
     display.update()
