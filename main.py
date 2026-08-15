@@ -20,11 +20,6 @@ class Display:
         self.win.blit(surf, pos)
         return
 
-    @staticmethod
-    def update():
-        pygame.display.update()
-        return
-
 
 FPS = 60 # Maximum frames per second
 
@@ -89,7 +84,7 @@ while run:
         space.draw_all()
 
     display.blit(space, (0, 0))
-    display.update()
+    pygame.display.update()
 
     # Cap the frame rate to FPS frames per second. Frames can take longer
     # if the frame takes a long time to compute.
