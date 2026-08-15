@@ -9,26 +9,35 @@ from weapons import (PhaseBlaster, PlasmaLauncher, IonFlak,
                      AlloyCannon, IonRing)
 from crates import HealthCrate, AmmoCrate, WeaponCrate
 from effects import Explosion
-from settings_reader import get_settings
 
 
 class Space(pygame.surface.Surface):
-    def __init__(self, width, height):
-        pygame.surface.Surface.__init__(self, (width, height))
-        self.width = width
-        self.height = height
+    def __init__(
+        self,
+        width: int,
+        height: int,
+        is_combine_asteroids: bool = False,
+        is_flip_aim: bool = False,
+        is_speed_up_when_loop: bool = False,
+        is_asteroids_do_damage: bool = True,
+    ) -> None:
+        super().__init__((width, height))
+
         self.font_big = pygame.font.SysFont('arial', 200)
         self.font_small = pygame.font.SysFont('arial', 50)
+
+        self._is_combine_asteroids = is_combine_asteroids
+        self._is_flip_aim = is_flip_aim
+        self._is_speed_up_when_loop = is_speed_up_when_loop
+        self._is_asteroids_do_damage = is_asteroids_do_damage
         return
 
     def reset_game(self):
-        self.settings = get_settings()
-        
         self.level_tick_durration = 0
         self.level = 1
         self.ticks_until_asteroid = self.ticks_per_asteroid
 
-        self.spaceship = Spaceship((self.width // 2, self.height // 2), 10)
+        self.spaceship = Spaceship((self.get_width() // 2, self.get_height() // 2), 10)
         self.projectiles = []
 
         self.asteroids = []
@@ -42,9 +51,6 @@ class Space(pygame.surface.Surface):
 
         self.clear()
         return
-
-    def check_setting(self, name, default):
-        return self.settings.get(name, default)
 
     ##
     # Level methods
@@ -149,13 +155,13 @@ class Space(pygame.surface.Surface):
             pygame.draw.rect(health_bar, color, (color_x_pos, 0, health_bar_width * ship_percent_health, health_bar_height))
         health_bar.set_alpha(150)
 
-        bar_x_pos = self.width // 2 - health_bar_width // 2
-        bar_y_pos = self.height - 20
+        bar_x_pos = self.get_width() // 2 - health_bar_width // 2
+        bar_y_pos = self.get_height() - 20
         self.blit(health_bar, (bar_x_pos, bar_y_pos))
         return
 
     def draw_level_progress(self):
-        level_bar_width = self.width
+        level_bar_width = self.get_width()
         level_bar_height = 5
         level_bar = pygame.surface.Surface((level_bar_width, level_bar_height))
         level_progress = self.level_tick_durration / self.ticks_per_level
@@ -189,7 +195,7 @@ class Space(pygame.surface.Surface):
 
     def draw_overlay(self):
         text = str(self.level)
-        pos = self.text_to_center_point(text, self.font_big, (self.width // 2, self.height // 2))
+        pos = self.text_to_center_point(text, self.font_big, (self.get_width() // 2, self.get_height() // 2))
         self.write_big(text, (72, 66, 84), pos)
 
         self.draw_weapon()
@@ -199,7 +205,7 @@ class Space(pygame.surface.Surface):
         self.draw_level_progress()
 
         text = 'Score: ' + str(self.spaceship.score)
-        pos = self.text_to_center_point(text, self.font_small, (self.width // 2, self.height // 2 + 100))
+        pos = self.text_to_center_point(text, self.font_small, (self.get_width() // 2, self.get_height() // 2 + 100))
         self.write_small(text, (20, 110, 8), pos)
         return
 
@@ -262,7 +268,7 @@ class Space(pygame.surface.Surface):
             if collide_i > -1:
                 asteroid = self.asteroids[collide_i]
 
-                if self.check_setting('asteroids_do_damage', 1):
+                if self._is_asteroids_do_damage:
                     self.spaceship.take_damage(asteroid.damage)
 
                 # test if the spaceship died
@@ -300,7 +306,7 @@ class Space(pygame.surface.Surface):
             asteroid.spin()
             self.loop_thing(asteroid)
 
-            if self.check_setting('combine_asteroids', 0):
+            if self._is_combine_asteroids:
                 collide_i = asteroid.get_hitbox().collidelist(asteroid_hitboxes)
                 # collides with asteroid thats not itself
                 if collide_i > -1 and collide_i != i:
@@ -430,14 +436,13 @@ class Space(pygame.surface.Surface):
         did_x_loop = False
         x_padding = image.get_width() * 0.2
         if thing.center_pos[0] < 0 - x_padding:
-            thing.base_pos[0] = int(self.width - image.get_width() / 2)
+            thing.base_pos[0] = int(self.get_width() - image.get_width() / 2)
             did_x_loop = True
-        elif thing.center_pos[0] > self.width + x_padding:
+        elif thing.center_pos[0] > self.get_width() + x_padding:
             thing.base_pos[0] = int(0 - image.get_width() / 2)
             did_x_loop = True
 
-        if (isinstance(thing, Asteroid)
-            and self.check_setting('speed_up_when_loop', 0)):
+        if isinstance(thing, Asteroid) and self._is_speed_up_when_loop:
             if did_x_loop:
                 if thing.vel[0] < 0:
                     thing.accelerate((-1, 0))
@@ -448,14 +453,13 @@ class Space(pygame.surface.Surface):
         did_y_loop = False
         y_padding = image.get_width() * 0.2
         if thing.center_pos[1] < 0 - y_padding:
-            thing.base_pos[1] = int(self.height - image.get_height() / 2)
+            thing.base_pos[1] = int(self.get_height() - image.get_height() / 2)
             did_y_loop = True
-        elif thing.center_pos[1] > self.height + y_padding:
+        elif thing.center_pos[1] > self.get_height() + y_padding:
             thing.base_pos[1] = int(0 - image.get_height() / 2)
             did_y_loop = True
 
-        if (isinstance(thing, Asteroid)
-            and self.check_setting('speed_up_when_loop', 0)):
+        if isinstance(thing, Asteroid) and self._is_speed_up_when_loop:
             if did_y_loop:
                 if thing.vel[1] < 0:
                     thing.accelerate((0, -1))
@@ -487,7 +491,7 @@ class Space(pygame.surface.Surface):
             else:
                 angle = 270
 
-        if self.check_setting('flip_aim', 0):
+        if self._is_flip_aim:
             angle += 180
         
         self.spaceship.angular_pos = angle
@@ -510,8 +514,8 @@ class Space(pygame.surface.Surface):
     ##
 
     def spawn_asteroid(self):
-        rand_x = random.choice((0, self.width))
-        rand_y = random.randint(0, self.height)
+        rand_x = random.choice((0, self.get_width()))
+        rand_y = random.randint(0, self.get_height())
 
         size = random.randint(2, 3)
 
@@ -551,8 +555,8 @@ class Space(pygame.surface.Surface):
     ##
 
     def spawn_random_crate(self, crates):
-        rand_x = random.choice((0, self.width))
-        rand_y = random.randint(0, self.height)
+        rand_x = random.choice((0, self.get_width()))
+        rand_y = random.randint(0, self.get_height())
 
         vel = random.randint(3, 5)
         # choose the quadrant the angle will be in
@@ -584,8 +588,8 @@ class Space(pygame.surface.Surface):
         return
 
     def spawn_crate(self, crate_type):
-        rand_x = random.choice((0, self.width))
-        rand_y = random.randint(0, self.height)
+        rand_x = random.choice((0, self.get_width()))
+        rand_y = random.randint(0, self.get_height())
 
         vel = random.randint(3, 5)
         # choose the quadrant the angle will be in

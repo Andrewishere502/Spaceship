@@ -1,13 +1,12 @@
+from pathlib import Path
 from math import sqrt, pi, cos, sin, acos
 
 import pygame
 
-from settings_reader import get_path
-
 
 class Asteroid(pygame.sprite.Sprite):
     def __init__(self, pos, size, vel, angular_pos, angular_vel):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__()
         self.base_pos = list(pos)
 
         self.angular_pos = angular_pos  # in degrees
@@ -18,13 +17,12 @@ class Asteroid(pygame.sprite.Sprite):
 
         self.size = size
 
-        self.reload_base_image()
+        self.set_base_image(size)
         return
 
-    def reload_base_image(self):
-        sprite_image = get_path() / 'Asteroids' / 'asteroid-{}.png'.format(self.size)
-
-        self.base_image = pygame.image.load(sprite_image).convert_alpha()
+    def set_base_image(self, size: int):
+        image_path = Path('Sprites', 'Asteroids', 'asteroid-{}.png'.format(size))
+        self.base_image = pygame.image.load(image_path).convert_alpha()
         return
 
     @property
@@ -114,7 +112,7 @@ class Asteroid(pygame.sprite.Sprite):
         self.vel[0] = vel_magnitude * cos(this_asteroid_vel_direction)
         self.vel[1] = vel_magnitude * sin(this_asteroid_vel_direction)
 
-        self.reload_base_image()
+        self.set_base_image(self.size)
 
         new_asteroid = Asteroid(self.base_pos, new_asteroid_mass,
                                 (new_asteroid_x_vel, new_asteroid_y_vel),

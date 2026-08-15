@@ -1,15 +1,16 @@
+from pathlib import Path
 import random
+
 import pygame
 
-from settings_reader import get_path
 from projectiles import PhaserProjectile, PlasmaProjectile, IonProjectile, AlloyProjectile
 
 
 class Gun:
     def __init__(self, weapon_name, image_name, max_ammo):
-        sprite_path = get_path() / 'Weapons' / image_name
+        image_path =  Path('Sprites', 'Weapons', image_name)
         self.name = weapon_name
-        self.image = pygame.image.load(sprite_path)
+        self.image = pygame.image.load(image_path)
         self.max_ammo = max_ammo
         self.ammo = max_ammo
         return

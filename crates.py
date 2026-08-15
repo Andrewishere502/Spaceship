@@ -1,6 +1,6 @@
-import pygame
+from pathlib import Path
 
-from settings_reader import get_path
+import pygame
 
 
 class Crate(pygame.sprite.Sprite):
@@ -14,15 +14,8 @@ class Crate(pygame.sprite.Sprite):
         self.vel = list(vel)  # in px/tick
         self.max_vel_component = 9
 
-        self.image_name = image_name
-
-        self.reload_base_image()
-        return
-
-    def reload_base_image(self):
-        sprite_image = get_path() / 'Crates' / self.image_name
-
-        self.base_image = pygame.image.load(sprite_image).convert_alpha()
+        image_path = Path('Sprites', 'Crates', image_name)
+        self.base_image = pygame.image.load(image_path).convert_alpha()
         return
 
     @property

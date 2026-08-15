@@ -1,8 +1,0 @@
-# path to your sprites, keep as the top variable!
-SPRITE_PATH = 'Sprites/'
-
-# rules
-combine_asteroids = false
-flip_aim = false
-speed_up_when_loop = false
-asteroids_do_damage = true

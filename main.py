@@ -1,3 +1,6 @@
+from pathlib import Path
+import tomllib
+
 import pygame
 
 from space import Space
@@ -21,20 +24,30 @@ class Display:
         return
 
 
-FPS = 60 # Maximum frames per second
+# Maximum frames per second
+FPS = 60
 
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
 
+SETTINGS_PATH = Path('settings.toml')
+IMAGES_PATH = Path('Sprites/')
+
 pygame.init()
 pygame.font.init()
 
-# Create an instance of the clock class to help control maximum frame rate
+display = Display(SCREEN_WIDTH, SCREEN_HEIGHT)
 clock = pygame.time.Clock()
 
-display = Display(SCREEN_WIDTH, SCREEN_HEIGHT)
-space = Space(SCREEN_WIDTH, SCREEN_HEIGHT)
+# Initialize the space object with the user settings.
+settings = tomllib.loads(SETTINGS_PATH.read_text())
+space = Space(
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    **settings
+)
 space.reset_game()
+
 
 pause = False
 run = True

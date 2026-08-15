@@ -1,17 +1,16 @@
-import pygame
+from pathlib import Path
 
-from settings_reader import get_path
+import pygame
 
 
 class Effect:
-    def __init__(self, pos, frames, frame_durration, frame_folder, scale=1, loop=False):
+    def __init__(self, pos, frame_paths, frame_durration, scale=1, loop=False):
         self.pos = list(pos)
 
-        # frames should all be the same size!
-        self.frames = tuple(map(lambda file_name: get_path() / frame_folder / file_name, frames))
+        self.frame_paths = frame_paths
 
         self.current_frame = 0
-        self.end_frame = len(frames)
+        self.end_frame = len(frame_paths)
 
         self.current_durration = 0
         self.frame_durration = frame_durration
@@ -40,7 +39,7 @@ class Effect:
         return
 
     def get_frame(self):
-        frame = self.frames[self.current_frame]
+        frame = self.frame_paths[self.current_frame]
         image = pygame.image.load(frame).convert_alpha()
         if self.scale != 1:
             image = pygame.transform.scale(image, (round(image.get_width() * self.scale),
@@ -58,7 +57,15 @@ class Effect:
 
 class Explosion(Effect):
     def __init__(self, pos, scale):
-        frames = ('1.png', '2.png', '3.png', '4.png', '5.png', '6.png')
-        frame_durration = 5
-        super().__init__(pos, frames, frame_durration, 'Explosion', scale=scale)
+        FRAME_DURRATION = 5
+
+        FRAME_PATHS = [Path('Sprites', 'Explosion', f'{frame_n}.png')
+                       for frame_n in range(1, 7)]
+
+        super().__init__(
+            pos,
+            FRAME_PATHS,
+            FRAME_DURRATION,
+            scale=scale
+        )
         return

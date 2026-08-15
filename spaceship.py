@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import pygame
 
-from settings_reader import get_path
 from weapons import PhaseBlaster
 
 
@@ -9,9 +10,8 @@ class Spaceship(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.base_pos = list(pos)
 
-        sprite_image = get_path() / 'spaceship-2.png'
-
-        self.base_image = pygame.image.load(sprite_image).convert_alpha()
+        image_path = Path('Sprites/spaceship-2.png')
+        self.base_image = pygame.image.load(image_path).convert_alpha()
 
         self.vel = [0, 0]  # in px/tick
         self.max_vel_component = 7

@@ -1,17 +1,17 @@
-import pygame
+from pathlib import Path
 from math import pi, cos, sin
 
-from settings_reader import get_path
+import pygame
 
 
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, pos, image, vel, damage, angular_pos, tick_life):
-        pygame.sprite.Sprite.__init__(self)
+    def __init__(self, pos, image_name, vel, damage, angular_pos, tick_life):
+        super().__init__()
         self.base_pos = list(pos)
 
-        sprite_image = get_path() / 'Projectiles' / image
+        image_path = Path('Sprites', 'Projectiles', image_name)
+        base_image = pygame.image.load(image_path).convert_alpha()
 
-        base_image = pygame.image.load(sprite_image).convert_alpha()
         self.base_width = base_image.get_width()
         self.base_height = base_image.get_height()
         self.image = pygame.transform.rotate(base_image, angular_pos)
@@ -25,9 +25,9 @@ class Projectile(pygame.sprite.Sprite):
 
     @property
     def pos(self):
-        '''Return the position of the top left corner
+        """Return the position of the top left corner
         of the image
-        '''
+        """
         # This all corrects the position so the center
         # is always in the same place. Then the asteroid
         # doesn't look like its so wobbly.
