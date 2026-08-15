@@ -20,7 +20,7 @@ class Crate(pygame.sprite.Sprite):
         return
 
     def reload_base_image(self):
-        sprite_image = get_path() / "Crates" / self.image_name
+        sprite_image = get_path() / 'Crates' / self.image_name
 
         self.base_image = pygame.image.load(sprite_image).convert_alpha()
         return
@@ -86,7 +86,7 @@ class Crate(pygame.sprite.Sprite):
 
 class HealthCrate(Crate):
     def __init__(self, pos, vel, angular_pos, angular_vel):
-        image_name = "health-crate.png"
+        image_name = 'health-crate.png'
         super().__init__(image_name, pos, vel, angular_pos, angular_vel)
         return
 
@@ -97,7 +97,7 @@ class HealthCrate(Crate):
 
 class AmmoCrate(Crate):
     def __init__(self, pos, vel, angular_pos, angular_vel):
-        image_name = "ammo-crate.png"
+        image_name = 'ammo-crate.png'
         super().__init__(image_name, pos, vel, angular_pos, angular_vel)
         return
 
@@ -109,7 +109,7 @@ class AmmoCrate(Crate):
 
 class WeaponCrate(Crate):
     def __init__(self, pos, vel, angular_pos, angular_vel, weapon):
-        image_name = "weapon-crate.png"
+        image_name = 'weapon-crate.png'
         super().__init__(image_name, pos, vel, angular_pos, angular_vel)
         self.weapon = weapon
         return

@@ -9,7 +9,7 @@ class Projectile(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.base_pos = list(pos)
 
-        sprite_image = get_path() / "Projectiles" / image
+        sprite_image = get_path() / 'Projectiles' / image
 
         base_image = pygame.image.load(sprite_image).convert_alpha()
         self.base_width = base_image.get_width()
@@ -25,9 +25,9 @@ class Projectile(pygame.sprite.Sprite):
 
     @property
     def pos(self):
-        """Return the position of the top left corner
+        '''Return the position of the top left corner
         of the image
-        """
+        '''
         # This all corrects the position so the center
         # is always in the same place. Then the asteroid
         # doesn't look like its so wobbly.
@@ -78,7 +78,7 @@ class PhaserProjectile(Projectile):
         damage = 1
         tick_life = 40
         
-        super().__init__(pos, "phaser-projectile.png",
+        super().__init__(pos, 'phaser-projectile.png',
                          vel_components, damage,
                          angular_pos, tick_life)
         return
@@ -94,7 +94,7 @@ class PlasmaProjectile(Projectile):
         damage = 2
         tick_life = 40
         
-        super().__init__(pos, "plasma-projectile.png",
+        super().__init__(pos, 'plasma-projectile.png',
                          vel_components, damage,
                          angular_pos, tick_life)
         return
@@ -110,7 +110,7 @@ class IonProjectile(Projectile):
         damage = 1
         tick_life = 10
         
-        super().__init__(pos, "ion-projectile.png",
+        super().__init__(pos, 'ion-projectile.png',
                          vel_components, damage,
                          angular_pos, tick_life)
         return
@@ -125,7 +125,7 @@ class AlloyProjectile(Projectile):
         damage = 1
         tick_life = 60
         
-        super().__init__(pos, "alloy-projectile.png",
+        super().__init__(pos, 'alloy-projectile.png',
                          vel_components, damage,
                          angular_pos, tick_life)
         return

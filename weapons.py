@@ -7,7 +7,7 @@ from projectiles import PhaserProjectile, PlasmaProjectile, IonProjectile, Alloy
 
 class Gun:
     def __init__(self, weapon_name, image_name, max_ammo):
-        sprite_path = get_path() / "Weapons" / image_name
+        sprite_path = get_path() / 'Weapons' / image_name
         self.name = weapon_name
         self.image = pygame.image.load(sprite_path)
         self.max_ammo = max_ammo
@@ -23,8 +23,8 @@ class Gun:
 
 class PhaseBlaster(Gun):
     def __init__(self):
-        weapon_name = "phase blaster"
-        image_name = "phase-blaster.png"
+        weapon_name = 'phase blaster'
+        image_name = 'phase-blaster.png'
         max_ammo = 200
         super().__init__(weapon_name, image_name, max_ammo)
         return
@@ -44,8 +44,8 @@ class PhaseBlaster(Gun):
 
 class PlasmaLauncher(Gun):
     def __init__(self):
-        weapon_name = "plasma launcher"
-        image_name = "plasma-launcher.png"
+        weapon_name = 'plasma launcher'
+        image_name = 'plasma-launcher.png'
         max_ammo = 50
         super().__init__(weapon_name, image_name, max_ammo)
         return
@@ -65,8 +65,8 @@ class PlasmaLauncher(Gun):
 
 class IonFlak(Gun):
     def __init__(self):
-        weapon_name = "ion flak"
-        image_name = "ion-flak.png"
+        weapon_name = 'ion flak'
+        image_name = 'ion-flak.png'
         max_ammo = 100
         super().__init__(weapon_name, image_name, max_ammo)
         return
@@ -93,8 +93,8 @@ class IonFlak(Gun):
 
 class AlloyCannon(Gun):
     def __init__(self):
-        weapon_name = "alloy cannon"
-        image_name = "alloy-cannon.png"
+        weapon_name = 'alloy cannon'
+        image_name = 'alloy-cannon.png'
         max_ammo = 100
         super().__init__(weapon_name, image_name, max_ammo)
         return
@@ -115,8 +115,8 @@ class AlloyCannon(Gun):
 
 class IonRing(Gun):
     def __init__(self):
-        weapon_name = "ion ring"
-        image_name = "ion-ring.png"
+        weapon_name = 'ion ring'
+        image_name = 'ion-ring.png'
         max_ammo = 10
         super().__init__(weapon_name, image_name, max_ammo)   
         return

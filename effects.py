@@ -58,7 +58,7 @@ class Effect:
 
 class Explosion(Effect):
     def __init__(self, pos, scale):
-        frames = ("1.png", "2.png", "3.png", "4.png", "5.png", "6.png")
+        frames = ('1.png', '2.png', '3.png', '4.png', '5.png', '6.png')
         frame_durration = 5
-        super().__init__(pos, frames, frame_durration, "Explosion", scale=scale)
+        super().__init__(pos, frames, frame_durration, 'Explosion', scale=scale)
         return

@@ -89,17 +89,17 @@ class Space(pygame.surface.Surface):
         # 1/7 chance to spawn weapon crate
         do_spawn_weapon_crate = not random.randint(0, 6)
         if do_spawn_weapon_crate:
-            self.spawn_crate("weapon")
+            self.spawn_crate('weapon')
 
         # spawn a crate every 2 levels.
         if self.level % 2 == 0:
             # give ammo to the player every 2 levels
-            self.spawn_crate("ammo")
+            self.spawn_crate('ammo')
 
             # 2/3 chance to spawn a health crate
             do_spawn_health_crate = random.randint(0, 2)
             if do_spawn_health_crate:
-                self.spawn_crate("health")
+                self.spawn_crate('health')
         return
 
     ##
@@ -173,7 +173,7 @@ class Space(pygame.surface.Surface):
         ammo_bar_y = 580
         ammo_bar_width = 128
 
-        if hasattr(self.spaceship.weapon, "image"):
+        if hasattr(self.spaceship.weapon, 'image'):
             weapon_image = self.spaceship.weapon.image
             # weapon_image.convert_alpha()
 
@@ -198,7 +198,7 @@ class Space(pygame.surface.Surface):
 
         self.draw_level_progress()
 
-        text = "Score: " + str(self.spaceship.score)
+        text = 'Score: ' + str(self.spaceship.score)
         pos = self.text_to_center_point(text, self.font_small, (self.width // 2, self.height // 2 + 100))
         self.write_small(text, (20, 110, 8), pos)
         return
@@ -262,7 +262,7 @@ class Space(pygame.surface.Surface):
             if collide_i > -1:
                 asteroid = self.asteroids[collide_i]
 
-                if self.check_setting("asteroids_do_damage", 1):
+                if self.check_setting('asteroids_do_damage', 1):
                     self.spaceship.take_damage(asteroid.damage)
 
                 # test if the spaceship died
@@ -300,7 +300,7 @@ class Space(pygame.surface.Surface):
             asteroid.spin()
             self.loop_thing(asteroid)
 
-            if self.check_setting("combine_asteroids", 0):
+            if self.check_setting('combine_asteroids', 0):
                 collide_i = asteroid.get_hitbox().collidelist(asteroid_hitboxes)
                 # collides with asteroid thats not itself
                 if collide_i > -1 and collide_i != i:
@@ -437,7 +437,7 @@ class Space(pygame.surface.Surface):
             did_x_loop = True
 
         if (isinstance(thing, Asteroid)
-            and self.check_setting("speed_up_when_loop", 0)):
+            and self.check_setting('speed_up_when_loop', 0)):
             if did_x_loop:
                 if thing.vel[0] < 0:
                     thing.accelerate((-1, 0))
@@ -455,7 +455,7 @@ class Space(pygame.surface.Surface):
             did_y_loop = True
 
         if (isinstance(thing, Asteroid)
-            and self.check_setting("speed_up_when_loop", 0)):
+            and self.check_setting('speed_up_when_loop', 0)):
             if did_y_loop:
                 if thing.vel[1] < 0:
                     thing.accelerate((0, -1))
@@ -487,7 +487,7 @@ class Space(pygame.surface.Surface):
             else:
                 angle = 270
 
-        if self.check_setting("flip_aim", 0):
+        if self.check_setting('flip_aim', 0):
             angle += 180
         
         self.spaceship.angular_pos = angle
@@ -573,7 +573,7 @@ class Space(pygame.surface.Surface):
         angular_vel = random.randint(-5, 5)  # in degrees/tick
 
         crate_type = random.choice(crates)
-        crate_maker = getattr(self, "make_" + crate_type + "_crate")
+        crate_maker = getattr(self, 'make_' + crate_type + '_crate')
         crate = crate_maker((rand_x, rand_y),
                             (x_vel, y_vel),
                             angular_pos,
@@ -605,7 +605,7 @@ class Space(pygame.surface.Surface):
         angular_pos = random.randint(0, 359)  # in degrees
         angular_vel = random.randint(-5, 5)  # in degrees/tick
 
-        crate_maker = getattr(self, "make_" + crate_type + "_crate")
+        crate_maker = getattr(self, 'make_' + crate_type + '_crate')
         crate = crate_maker((rand_x, rand_y),
                             (x_vel, y_vel),
                             angular_pos,
