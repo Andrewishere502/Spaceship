@@ -9,7 +9,7 @@ class Display:
         self.height = height
         self.win = pygame.display.set_mode((width, height))
 
-        pygame.display.set_caption('Asteroids')
+        pygame.display.set_caption('Spaceship')
         return
 
     def clear(self):
