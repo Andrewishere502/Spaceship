@@ -4,7 +4,7 @@ import pygame
 
 
 class Effect:
-    def __init__(self, pos, frame_paths, frame_durration, scale=1, loop=False):
+    def __init__(self, pos, frame_paths, frame_duration, scale=1, loop=False):
         self.pos = list(pos)
 
         self.frame_paths = frame_paths
@@ -13,7 +13,7 @@ class Effect:
         self.end_frame = len(frame_paths)
 
         self.current_durration = 0
-        self.frame_durration = frame_durration
+        self.frame_duration = frame_duration
 
         self.scale = scale
 
@@ -23,7 +23,7 @@ class Effect:
 
     def tick(self):
         self.current_durration += 1
-        if self.current_durration == self.frame_durration:
+        if self.current_durration == self.frame_duration:
             self.next_frame()
         return
 
@@ -57,7 +57,7 @@ class Effect:
 
 class Explosion(Effect):
     def __init__(self, pos, scale):
-        FRAME_DURRATION = 5
+        FRAME_DURATION = 5
 
         FRAME_PATHS = [Path('Sprites', 'Explosion', f'{frame_n}.png')
                        for frame_n in range(1, 7)]
@@ -65,7 +65,7 @@ class Explosion(Effect):
         super().__init__(
             pos,
             FRAME_PATHS,
-            FRAME_DURRATION,
+            FRAME_DURATION,
             scale=scale
         )
         return
