@@ -1,12 +1,20 @@
 import random
-from math import pi, sin, cos, atan
+import math
 
 import pygame
+from pygame import Vector2
 
+from entity import Entity
 from asteroid import Asteroid
 from spaceship import Spaceship
-from weapons import (PhaseBlaster, PlasmaLauncher, IonFlak,
-                     AlloyCannon, IonRing)
+from projectiles import Projectile
+from weapons import (
+    PhaseBlaster,
+    PlasmaLauncher,
+    IonFlak,
+    AlloyCannon,
+    IonRing
+)
 from crates import HealthCrate, AmmoCrate, WeaponCrate
 from effects import Explosion
 
@@ -37,15 +45,21 @@ class Space(pygame.surface.Surface):
         self.level = 1
         self.ticks_until_asteroid = self.ticks_per_asteroid
 
-        self.spaceship = Spaceship((self.get_width() // 2, self.get_height() // 2), 10)
-        self.projectiles = []
+        self.spaceship = Spaceship(
+            Vector2(
+                self.get_width() // 2,
+                self.get_height() // 2,
+            ),
+            10,
+        )
+        self.projectiles: list[Projectile] = []
 
-        self.asteroids = []
+        self.asteroids: list[Asteroid] = []
         start_asteroids = 3
         for _ in range(start_asteroids):
             self.spawn_asteroid()
 
-        self.crates = []
+        self.crates: list[HealthCrate | AmmoCrate | WeaponCrate] = []
 
         self.effects = []
 
@@ -91,21 +105,21 @@ class Space(pygame.surface.Surface):
     def next_level(self):
         self.level += 1
         self.level_tick_durration = 1
-        
+
         # 1/7 chance to spawn weapon crate
         do_spawn_weapon_crate = not random.randint(0, 6)
         if do_spawn_weapon_crate:
-            self.spawn_crate('weapon')
+            self.spawn_crate(WeaponCrate)
 
         # spawn a crate every 2 levels.
         if self.level % 2 == 0:
             # give ammo to the player every 2 levels
-            self.spawn_crate('ammo')
+            self.spawn_crate(AmmoCrate)
 
             # 2/3 chance to spawn a health crate
             do_spawn_health_crate = random.randint(0, 2)
             if do_spawn_health_crate:
-                self.spawn_crate('health')
+                self.spawn_crate(HealthCrate)
         return
 
     ##
@@ -185,7 +199,7 @@ class Space(pygame.surface.Surface):
 
             # blit the image of the weapon to the screen
             self.blit(weapon_image, (weapon_bar_x, weapon_bar_y))
-        
+
         ammo_percent = self.spaceship.weapon.ammo / self.spaceship.weapon.max_ammo
 
         if ammo_percent > 0:
@@ -209,27 +223,10 @@ class Space(pygame.surface.Surface):
         self.write_small(text, (20, 110, 8), pos)
         return
 
-    def draw_asteroids(self):
-        # blit asteroids
-        for asteroid in self.asteroids:
-            self.blit(asteroid.get_image(), asteroid.pos)
-        return
-
-    def draw_spaceship(self):
-        # blit spaceship
-        self.blit(self.spaceship.get_image(), self.spaceship.pos)
-        return
-
-    def draw_projectiles(self):
-        # blit projectiles
-        for projectile in self.projectiles:
-            self.blit(projectile.image, projectile.pos)
-        return
-
-    def draw_crates(self):
-        # blit crates
-        for crate in self.crates:
-            self.blit(crate.get_image(), crate.pos)
+    def draw_entity(self, entity: Entity) -> None:
+        image = entity.get_image()
+        rect = entity.get_image().get_rect(center=entity.movement.get_pos())
+        self.blit(image, rect)
         return
 
     def draw_effects(self):
@@ -239,11 +236,19 @@ class Space(pygame.surface.Surface):
 
     def draw_all(self):
         self.draw_overlay()
-        self.draw_crates()
-        self.draw_asteroids()
-        self.draw_projectiles()
+
+        for crate in self.crates:
+            self.draw_entity(crate)
+
+        for asteroid in self.asteroids:
+            self.draw_entity(asteroid)
+
+        for projectile in self.projectiles:
+            self.draw_entity(projectile)
+
         if self.spaceship.is_alive:
-            self.draw_spaceship()
+            self.draw_entity(self.spaceship)
+
         self.draw_effects()
         return
 
@@ -251,18 +256,24 @@ class Space(pygame.surface.Surface):
     # Misc methods
     ##
 
-    def randomize_pos(self, pos):
-        return tuple(map(lambda c: c + random.randint(34, 45) * random.choice((-1, 1)), pos))
-
-    def tick(self):
+    def step(self, delta_ms: int):
         asteroid_hitboxes = [asteroid.get_hitbox() for asteroid in self.asteroids]
         crate_hitboxes = [crate.get_hitbox() for crate in self.crates]
 
         # control spaceship!
         if self.spaceship.is_alive:
-            self.spaceship.move()
-            self.loop_thing(self.spaceship)
-            
+            self.spaceship.movement.step(delta_ms)
+
+            # Wrap the spaceship around to the other side of the
+            # screen.
+            pos = self.spaceship.movement.get_pos()
+            self.spaceship.movement.set_pos(
+                Vector2(
+                    pos.x % self.get_width(),
+                    pos.y % self.get_height(),
+                )
+            )
+
             # test if the spaceship got hit by an asteroid
             collide_i = self.spaceship.get_hitbox().collidelist(asteroid_hitboxes)
             if collide_i > -1:
@@ -273,16 +284,16 @@ class Space(pygame.surface.Surface):
 
                 # test if the spaceship died
                 if not self.spaceship.is_alive:
-                    self.add_explosion(self.spaceship.center_pos, 1.5)
+                    self.add_explosion(self.spaceship.movement.get_pos(), 1.5)
                 else:
-                    self.add_explosion(asteroid.center_pos, 1)
+                    self.add_explosion(asteroid.movement.get_pos(), 1)
 
                 # delete the asteroid from asteroid_hitboxes
                 # *and* self.asteroids so asteroid_hitboxes doesn't
                 # have to be recalculated
                 asteroid_hitboxes.pop(collide_i)
                 self.asteroids.pop(collide_i)
-            
+
             # test if the spaceship picked up a crate
             collide_i = self.spaceship.get_hitbox().collidelist(crate_hitboxes)
             if collide_i > -1:
@@ -297,86 +308,44 @@ class Space(pygame.surface.Surface):
                 self.crates.pop(collide_i)
 
         # control asteroids
-        i = 0
-        while len(self.asteroids):
-            increment_i = True
-            asteroid = self.asteroids[i]
-
-            asteroid.move()
-            asteroid.spin()
-            self.loop_thing(asteroid)
-
-            if self._is_combine_asteroids:
-                collide_i = asteroid.get_hitbox().collidelist(asteroid_hitboxes)
-                # collides with asteroid thats not itself
-                if collide_i > -1 and collide_i != i:
-                    collide_asteroid = self.asteroids[collide_i]
-
-                    # The following code determines if the asteroids
-                    # are actually moving into each other or not. This
-                    # is important because we don't want to combine
-                    # asteroids that have just been split and are now
-                    # moving away from each other.
-                    #
-                    # dx and dx_vel are positive when asteroid is to
-                    # the right of collide_asteroid, and negative when it
-                    # is to the left
-                    dx = round(asteroid.center_pos[0] - collide_asteroid.center_pos[0], 6)
-                    dx_vel = round(asteroid.vel[0] - collide_asteroid.vel[0], 6)
-                    try:
-                        x_collide = dx / dx_vel < 0
-                    except ZeroDivisionError:
-                        x_collide = False
-
-                    # dy and dy_vel are positive when asteroid above
-                    # collide_asteroid, and negative when it is below
-                    dy = round(collide_asteroid.center_pos[1] - asteroid.center_pos[1], 6)
-                    dy_vel = round(asteroid.vel[1] - collide_asteroid.vel[1], 6)
-                    try:
-                        y_collide = dy / dy_vel < 0
-                    except ZeroDivisionError:
-                        y_collide = False
-
-                    if x_collide or y_collide:
-                        if asteroid.size > collide_asteroid.size:
-                            # this asteroid consumes the other one
-                            self.merge_asteroids(asteroid, collide_asteroid)
-                            # delete the asteroid from asteroid_hitboxes
-                            # *and* self.asteroids so asteroid_hitboxes doesn't
-                            # have to be recalculated
-                            asteroid_hitboxes.pop(collide_i)
-                            self.asteroids.pop(collide_i)
-                            if i > collide_i:
-                                increment_i = False
-                        else:
-                            # the other asteroid consumes this one
-                            self.merge_asteroids(collide_asteroid, asteroid)
-                            # delete the asteroid from asteroid_hitboxes
-                            # *and* self.asteroids so asteroid_hitboxes doesn't
-                            # have to be recalculated
-                            asteroid_hitboxes.pop(i)
-                            self.asteroids.pop(i)
-                            increment_i = False
-
-            if increment_i:
-                i += 1
-
-            if i == len(self.asteroids):
-                break
+        for asteroid in self.asteroids:
+            asteroid.movement.step(delta_ms)
+            pos = asteroid.movement.get_pos()
+            # Wrap the asteroid around the other side of the screen.
+            asteroid.movement.set_pos(
+                Vector2(
+                    pos.x % self.get_width(),
+                    pos.y % self.get_height(),
+                )
+            )
 
         # control crates
         for crate in self.crates:
-            crate.move()
-            crate.spin()
-            self.loop_thing(crate)
+            crate.movement.step(delta_ms)
+            pos = crate.movement.get_pos()
+            # Wrap the asteroid around the other side of the screen.
+            crate.movement.set_pos(
+                Vector2(
+                    pos.x % self.get_width(),
+                    pos.y % self.get_height(),
+                )
+            )
 
         # control projectiles
         i = 0
         while len(self.projectiles):
             increment_i = True
             projectile = self.projectiles[i]
-            
-            self.loop_thing(projectile)
+
+            pos = projectile.movement.get_pos()
+            # Wrap the asteroid around the other side of the screen.
+            projectile.movement.set_pos(
+                Vector2(
+                    pos.x % self.get_width(),
+                    pos.y % self.get_height(),
+                )
+            )
+
             if not projectile.dead:  # projectile is still 'alive'
                 collide_i = projectile.get_hitbox().collidelist(asteroid_hitboxes)
                 if collide_i > -1:  # projectile hit an asteroid
@@ -394,7 +363,7 @@ class Space(pygame.surface.Surface):
                     self.projectiles.pop(i)
                     increment_i = False
                 else:  # projectile did not hit an asteroid
-                    projectile.move()
+                    projectile.step(delta_ms)
             else:  # projectile has died and must be removed
                 self.projectiles.pop(i)
                 increment_i = False
@@ -423,90 +392,13 @@ class Space(pygame.surface.Surface):
         self.increment_tick()
         return
 
-    def loop_thing(self, thing):
-        """Loop a thing to the other side of the screen
-        when it goes out of bounds
-        """
-        try:
-            image = thing.get_image()
-        except AttributeError:
-            image = thing.image
-
-        # loop the thing's x position
-        did_x_loop = False
-        x_padding = image.get_width() * 0.2
-        if thing.center_pos[0] < 0 - x_padding:
-            thing.base_pos[0] = int(self.get_width() - image.get_width() / 2)
-            did_x_loop = True
-        elif thing.center_pos[0] > self.get_width() + x_padding:
-            thing.base_pos[0] = int(0 - image.get_width() / 2)
-            did_x_loop = True
-
-        if isinstance(thing, Asteroid) and self._is_speed_up_when_loop:
-            if did_x_loop:
-                if thing.vel[0] < 0:
-                    thing.accelerate((-1, 0))
-                else:
-                    thing.accelerate((1, 0))
-
-        # loop the thing's y position
-        did_y_loop = False
-        y_padding = image.get_width() * 0.2
-        if thing.center_pos[1] < 0 - y_padding:
-            thing.base_pos[1] = int(self.get_height() - image.get_height() / 2)
-            did_y_loop = True
-        elif thing.center_pos[1] > self.get_height() + y_padding:
-            thing.base_pos[1] = int(0 - image.get_height() / 2)
-            did_y_loop = True
-
-        if isinstance(thing, Asteroid) and self._is_speed_up_when_loop:
-            if did_y_loop:
-                if thing.vel[1] < 0:
-                    thing.accelerate((0, -1))
-                else:
-                    thing.accelerate((0, 1))
-        return
-
     ##
     # Spaceship methods
     ##
 
-    def point_spaceship(self, pos):
-        x_dis = abs(pos[0] - self.spaceship.center_pos[0])
-        y_dis = abs(pos[1] - self.spaceship.center_pos[1])
-        try:
-            angle = atan(y_dis / x_dis) / pi * 180
-
-            if pos[0] < self.spaceship.center_pos[0]:
-                # reflect accross y axis
-                angle = 180 - angle
-
-            if pos[1] > self.spaceship.center_pos[1]:
-                # reflect accross x axis
-                angle = 360 - angle
-
-        except ZeroDivisionError:
-            if pos[1] < self.spaceship.center_pos[1]:
-                angle = 90
-            else:
-                angle = 270
-
-        if self._is_flip_aim:
-            angle += 180
-        
-        self.spaceship.angular_pos = angle
-        return
-
     def spaceship_shoot(self):
-        projectiles = self.spaceship.fire_weapon()
-        if projectiles == None:
-            return
-        elif isinstance(projectiles, (list, tuple)):
-            # projectiles is multiple projectiles
-            self.projectiles.extend(projectiles)
-        else:
-            # projectiles is just one projectile
-            self.projectiles.append(projectiles)
+        new_projectiles = self.spaceship.fire_weapon()
+        self.projectiles.extend(new_projectiles)
         return
 
     ##
@@ -514,35 +406,38 @@ class Space(pygame.surface.Surface):
     ##
 
     def spawn_asteroid(self):
+        # Maximum magnitude of velocity is 0.1.
+        MAX_SPEED = 0.1
+
+        # Spawn on either the left or right side.
         rand_x = random.choice((0, self.get_width()))
+        # Span at any height value.
         rand_y = random.randint(0, self.get_height())
+
+        angle = random.randint(0, 359)
+        speed = random.random() * MAX_SPEED
+        initial_vel = Vector2(
+            math.sqrt(speed),
+            math.sqrt(speed),
+        ).rotate(
+            angle
+        )
 
         size = random.randint(2, 3)
 
-        vel = random.randint(3, 5)
-        quadrant = random.randint(1, 4)
-        if quadrant == 1:
-            direction = random.randint(20, 70)
-        elif quadrant == 2:
-            direction = random.randint(110, 160)
-        elif quadrant == 3:
-            direction = random.randint(200, 250)
-        else:  # in quadrant 4
-            direction = random.randint(290, 340)
-        direction = direction / 180 * pi
-        x_vel = vel * cos(direction)
-        y_vel = vel * sin(direction)
-
-        angular_pos = random.randint(0, 359)  # in degrees
-        angular_vel = random.randint(-5, 5)  # in degrees/tick
-    
-        asteriod = Asteroid((rand_x, rand_y), size, (x_vel, y_vel), angular_pos, angular_vel)
+        asteriod = Asteroid(
+            Vector2(rand_x, rand_y),
+            initial_vel,
+            angle,
+            (random.random() - 0.5),  # -0.5 to 0.5
+            size,
+        )
         self.asteroids.append(asteriod)
         return
 
     def merge_asteroids(self, asteroid1, asteroid2):
         asteroid1.accelerate(tuple(map(lambda c: c * 0.2, asteroid2.vel)))
-        
+
         asteroid1.size += asteroid2.size
         if asteroid1.size > 5:
             asteroid1.size = 5
@@ -554,68 +449,40 @@ class Space(pygame.surface.Surface):
     # Power up methods
     ##
 
-    def spawn_random_crate(self, crates):
+    def spawn_crate(self, crate_type: type[HealthCrate | AmmoCrate | WeaponCrate]) -> None:
+        # Spawn on either the left or right side.
         rand_x = random.choice((0, self.get_width()))
+        # Span at any height value.
         rand_y = random.randint(0, self.get_height())
 
-        vel = random.randint(3, 5)
-        # choose the quadrant the angle will be in
-        quadrant = random.randint(1, 4)
-        if quadrant == 1:
-            direction = random.randint(20, 70)
-        elif quadrant == 2:
-            direction = random.randint(110, 160)
-        elif quadrant == 3:
-            direction = random.randint(200, 250)
-        else:  # in quadrant 4
-            direction = random.randint(290, 340)
-        direction = direction / 180 * pi
-        x_vel = vel * cos(direction)
-        y_vel = vel * sin(direction)
+        angle = random.randint(0, 359)
+        speed = random.random() * (crate_type.MAX_VEL_COMPONENT ** 2)
+        initial_vel = Vector2(
+            math.sqrt(speed),
+            math.sqrt(speed),
+        ).rotate(
+            angle
+        )
 
-        angular_pos = random.randint(0, 359)  # in degrees
-        angular_vel = random.randint(-5, 5)  # in degrees/tick
+        # Angular velocity in degrees.
+        initial_avel = (random.random() - 0.5) * 2 * crate_type.MAX_AVEL
 
-        crate_type = random.choice(crates)
-        crate_maker = getattr(self, 'make_' + crate_type + '_crate')
-        crate = crate_maker((rand_x, rand_y),
-                            (x_vel, y_vel),
-                            angular_pos,
-                            angular_vel
-                            )
-
-        self.crates.append(crate)
-        return
-
-    def spawn_crate(self, crate_type):
-        rand_x = random.choice((0, self.get_width()))
-        rand_y = random.randint(0, self.get_height())
-
-        vel = random.randint(3, 5)
-        # choose the quadrant the angle will be in
-        quadrant = random.randint(1, 4)
-        if quadrant == 1:
-            direction = random.randint(20, 70)
-        elif quadrant == 2:
-            direction = random.randint(110, 160)
-        elif quadrant == 3:
-            direction = random.randint(200, 250)
-        else:  # in quadrant 4
-            direction = random.randint(290, 340)
-        direction = direction / 180 * pi
-        x_vel = vel * cos(direction)
-        y_vel = vel * sin(direction)
-
-        angular_pos = random.randint(0, 359)  # in degrees
-        angular_vel = random.randint(-5, 5)  # in degrees/tick
-
-        crate_maker = getattr(self, 'make_' + crate_type + '_crate')
-        crate = crate_maker((rand_x, rand_y),
-                            (x_vel, y_vel),
-                            angular_pos,
-                            angular_vel
-                            )
-
+        crate_args = (
+            Vector2(rand_x, rand_y),
+            initial_vel,
+            angle,
+            initial_avel,
+        )
+        if crate_type == HealthCrate:
+            crate = self.make_health_crate(*crate_args)
+        elif crate_type == AmmoCrate:
+            crate = self.make_ammo_crate(*crate_args)
+        elif crate_type == WeaponCrate:
+            crate = self.make_weapon_crate(*crate_args)
+        else:
+            raise TypeError(
+                f'Unknown crate type {crate_type!r}'
+            )
         self.crates.append(crate)
         return
 

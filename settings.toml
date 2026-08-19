@@ -1,4 +1,2 @@
-is_combine_asteroids = false
 is_flip_aim = false
-is_speed_up_when_loop = false
 is_asteroids_do_damage = true
