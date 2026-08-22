@@ -11,6 +11,7 @@ from weapons import (
     IonRing,
 )
 from entity import Entity
+from components import Health
 
 
 class Spaceship(Entity):
@@ -32,8 +33,7 @@ class Spaceship(Entity):
             max_avel=0,
         )
 
-        self.max_health = health
-        self.health = health
+        self.health = Health(health, health)
 
         self.weapons_array = [
             PhaseBlaster(),
@@ -47,16 +47,12 @@ class Spaceship(Entity):
         self.asteriods_shot = 0
         return
 
-    def take_damage(self, damage):
-        self.health -= damage
-        if self.health < 0:
-            self.health = 0
+    def damage(self, hp: float) -> None:
+        self.health.reduce(hp)
         return
 
-    def heal(self, health):
-        self.health += health
-        if self.health > self.max_health:
-            self.health = self.max_health
+    def heal(self, hp: float) -> None:
+        self.health.increase(hp)
         return
 
     def next_weapon(self):
@@ -78,8 +74,8 @@ class Spaceship(Entity):
         )
 
     @property
-    def is_alive(self):
-        return self.health > 0
+    def is_alive(self) -> bool:
+        return self.health.is_alive
 
     @property
     def weapon(self):

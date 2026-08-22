@@ -111,7 +111,7 @@ while run:
             space.spaceship.movement.apply_acceleration(Vector2(-0.005, 0))
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:  # move spaceship right
             space.spaceship.movement.apply_acceleration(Vector2(0.005, 0))
-        
+
         if not pause:
             # Point the spaceship at the mouse.
             mouse_pos =  Vector2(*pygame.mouse.get_pos())

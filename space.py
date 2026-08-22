@@ -152,21 +152,21 @@ class Space(pygame.surface.Surface):
         health_bar_width = 300
         health_bar_height = 10
         health_bar = pygame.surface.Surface((health_bar_width, health_bar_height))
-        ship_percent_health = self.spaceship.health / self.spaceship.max_health
-        if ship_percent_health > 0.85:
+        ship_hp_rate = self.spaceship.health.get_hp_rate()
+        if ship_hp_rate > 0.85:
             color = (84, 186, 0)
-        elif ship_percent_health > 0.70:
+        elif ship_hp_rate > 0.70:
             color = (186, 186, 0)
-        elif ship_percent_health > 0.50:
+        elif ship_hp_rate > 0.50:
             color = (186, 118, 0)
-        elif ship_percent_health > 0.20:
+        elif ship_hp_rate > 0.20:
             color = (186, 71, 0)
         else:
             color = (186, 12, 0)
         pygame.draw.rect(health_bar, (112, 112, 112), (0, 0, health_bar_width, health_bar_height))
-        color_x_pos = health_bar.get_width() // 2 - health_bar_width * ship_percent_health // 2
-        if ship_percent_health > 0:
-            pygame.draw.rect(health_bar, color, (color_x_pos, 0, health_bar_width * ship_percent_health, health_bar_height))
+        color_x_pos = health_bar.get_width() // 2 - health_bar_width * ship_hp_rate // 2
+        if ship_hp_rate > 0:
+            pygame.draw.rect(health_bar, color, (color_x_pos, 0, health_bar_width * ship_hp_rate, health_bar_height))
         health_bar.set_alpha(150)
 
         bar_x_pos = self.get_width() // 2 - health_bar_width // 2
@@ -280,7 +280,7 @@ class Space(pygame.surface.Surface):
                 asteroid = self.asteroids[collide_i]
 
                 if self._is_asteroids_do_damage:
-                    self.spaceship.take_damage(asteroid.damage)
+                    self.spaceship.damage(asteroid.damage)
 
                 # test if the spaceship died
                 if not self.spaceship.is_alive:

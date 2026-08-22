@@ -1,5 +1,4 @@
 from pathlib import Path
-import math
 
 import pygame
 from pygame import Vector2
