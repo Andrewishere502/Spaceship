@@ -280,7 +280,7 @@ class Space(pygame.surface.Surface):
                 asteroid = self.asteroids[collide_i]
 
                 if self._is_asteroids_do_damage:
-                    self.spaceship.damage(asteroid.damage)
+                    self.spaceship.health.adjust_hitpoints(-asteroid.damage)
 
                 # test if the spaceship died
                 if not self.spaceship.is_alive:

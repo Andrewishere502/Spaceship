@@ -1,15 +1,17 @@
-from abc import (
-    ABC,
-    abstractmethod,
-)
+import datetime
 from pathlib import Path
 import random
 
 import pygame
 from pygame import Vector2
 
+from utils import (
+    CooldownTimer,
+    BoundedFloat,
+)
 
-class AbstractWeapon[ProjectileType](ABC):
+
+class AbstractWeapon[ProjectileType]:
     def __init__(
         self,
         weapon_name: str,
@@ -17,7 +19,31 @@ class AbstractWeapon[ProjectileType](ABC):
         projectile_class: type[ProjectileType],
         max_ammo: int,
         ammo_per_use: int,
+        ammo_spread: float,
+        fire_rate: datetime.timedelta,
     ) -> None:
+        """
+        Instantiate the new weapon.
+
+        :param weapon_name:
+        :type weapon_name: str
+        :param image_name: 
+        :type image_name: str
+        :param projectile_class:
+        :type projectile_class: type[ProjectileType]
+        :param max_ammo:
+        :type max_ammo: int
+        :param ammo_per_use:
+        :type ammo_per_use: int
+        :param ammo_spread: How much the angle of the created
+            projectile may deviate from the base angle, centered on
+            `base_angle`. In other words, the initial angle of a
+            produced projectile may be `base_angle - ammo_spread / 2`
+            to `base_angle + ammo_spread / 2`.
+        :type ammo_spread: float
+        :param fire_rate:
+        :type fire_rate: datetime.timedelta
+        """
         image_path =  Path('Sprites', 'Weapons', image_name)
         self.image = pygame.image.load(image_path)
 
@@ -25,76 +51,46 @@ class AbstractWeapon[ProjectileType](ABC):
 
         self.name = weapon_name
 
-        self.max_ammo = max_ammo
-        self.ammo = max_ammo
+        self._ammo = BoundedFloat(
+            max_ammo,
+            0,
+            max_ammo
+        )
         self.ammo_per_use = ammo_per_use
+        self.ammo_spread = ammo_spread
+
+        self._cooldown_timer = CooldownTimer(fire_rate)
         return
 
-    def get_ammo_ratio(self) -> float:
-        """
-        Return the ratio of current ammo to maximum ammo.
-        """
-        return self.ammo / self.max_ammo
-
-    def adjust_ammo(self, delta_ammo: int) -> None:
-        """
-        Adjust the current ammo level by the given amount (positive or
-        negative). Cannot decrease ammo
-
-        :param delta_ammo: The amount of ammo to increase/decrease the
-            current ammo level by. Positive to increase ammo, negative
-            to decrease ammo.
-        :type delta_ammo: int
-        """
-        self.ammo += delta_ammo
-        # Cap ammo to minimum 0.
-        self.ammo = max(self.ammo, 0)
-        # Cap ammo to maximum `self.max_ammo`.
-        self.ammo = min(self.ammo, self.max_ammo)
-        return
-
-    @abstractmethod
     def fire(
         self,
         initial_pos: Vector2,
         base_angle: float,
     ) -> list[ProjectileType]:
         """
-        Return a list of projectiles fired from the weapon.
-        """
-
-    def _make_projectiles(
-        self,
-        initial_pos: Vector2,
-        base_angle: float,
-        angle_spread: float = 0,
-    ) -> list[ProjectileType]:
-        """
-        Return a list of `n` projectiles, where `n` is the ammo per use
-        or the ammo remaining, whichever is less.
+        Return a list of projectiles produced by the weapon.
 
         :param initial_pos: Initial position of the projectile.
         :type initial_pos: Vector2
         :param base_angle: Base angle for the projectile.
         :type base_angle: float
-        :param angle_spread: How much the angle of the created
-            projectile may deviate from the base angle, centered on
-            `base_angle`. In other words, the initial angle of a
-            produced projectile may be `base_angle - angle_spread / 2`
-            to `base_angle + angle_spread / 2`.
-        :type angle_spread: float
         :return: A list of projectiles.
         :rtype: list[ProjectileType]
         """
 
+        # Return no projectiles if the cooldown isn't ready yet.
+        is_ready = self._cooldown_timer.get_is_ready()
+        if not is_ready:
+            return []
+
         # Limit the number of projectiles fired to the ammo remaining.
-        num_projectiles = min(self.ammo, self.ammo_per_use)
+        num_projectiles = min(int(self._ammo.value), self.ammo_per_use)
         if num_projectiles == 0:
             return []
 
         # Calculate the minimum and maximum projectile angle.
-        min_angle = base_angle - angle_spread / 2
-        max_angle = base_angle + angle_spread / 2
+        min_angle = base_angle - self.ammo_spread / 2
+        max_angle = base_angle + self.ammo_spread / 2
 
         # Create one projectile for the number of projectiles that
         # should be fired.
@@ -109,7 +105,38 @@ class AbstractWeapon[ProjectileType](ABC):
 
         # Reduce the ammo level by how much was used.
         self.adjust_ammo(-num_projectiles)
+
+        # Start the weapon's cooldown again.
+        self._cooldown_timer.start()
         return projectiles
+
+    def adjust_ammo(self, delta_ammo: int) -> None:
+        """
+        Adjust the current ammo level by the given amount (positive or
+        negative). Cannot decrease ammo
+
+        :param delta_ammo: The amount of ammo to increase/decrease the
+            current ammo level by. Positive to increase ammo, negative
+            to decrease ammo.
+        :type delta_ammo: int
+        """
+        self._ammo += delta_ammo
+        return
+
+    def refill(self) -> None:
+        """
+        Completely refill the weapon's ammo.
+        """
+        # Fill the ammo to max. It will be clipped to avoid exceeding
+        # the maximum allowed ammo.
+        self.adjust_ammo(int(self._ammo.max_value))
+        return
+
+    def get_ammo_ratio(self) -> float:
+        """
+        Return the ratio of current ammo to maximum ammo.
+        """
+        return self._ammo.get_normalized()
 
     @staticmethod
     def _get_random_float(
@@ -129,3 +156,10 @@ class AbstractWeapon[ProjectileType](ABC):
                 '`min_value` cannot be greater than `max_value`'
             )
         return min_value + random.random() * (max_value - min_value)
+
+    @property
+    def is_ready(self) -> bool:
+        """
+        Return `True` if the weapon can fire, otherwise return `False`.
+        """
+        return self._cooldown_timer.get_is_ready()

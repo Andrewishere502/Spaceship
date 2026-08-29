@@ -42,7 +42,7 @@ class HealthCrate(Crate):
         :param spaceship: The spaceship to heal.
         :type spaceship: Spaceship
         """
-        spaceship.heal(spaceship.health.max_hitpoints - spaceship.health.hitpoints)
+        spaceship.health.adjust_hitpoints(spaceship.health.max_hitpoints)
         return
 
 
@@ -59,8 +59,7 @@ class AmmoCrate(Crate):
         :param spaceship: The spaceship to refill ammo for.
         :type spaceship: Spaceship
         """
-        refill_ammo = spaceship.weapon.max_ammo - spaceship.weapon.ammo
-        spaceship.weapon.adjust_ammo(refill_ammo)
+        spaceship.get_weapon().refill()
         return
 
 
@@ -72,14 +71,12 @@ class WeaponCrate(Crate):
         return
 
     def do_action(self, spaceship):
-        # check to see if the weapon is repeated in weapons_array.
+        # Check to see if the weapon is repeated in weapons_array.
         weapon_repeated = False
         for weapon in spaceship.weapons_array:
-            # if the weapon is in weapons_array already, refill it.
+            # If the weapon is in weapons_array already, refill it.
             if weapon.name == self.weapon.name:
-                ammo = weapon.max_ammo - weapon.ammo
-                weapon.refill(ammo)
-                weapon_repeated = True
+                weapon.refill()
                 break
 
         # if the weapon is not in weapons_array already, add it.

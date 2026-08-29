@@ -95,7 +95,7 @@ while run:
                 if buttons_down[0]:
                     space.spaceship_shoot()
 
-    # Hold to shoot!
+    # # Hold to shoot!
     # keys_pressed = pygame.key.get_pressed()
     # if keys_pressed[pygame.K_SPACE]:
     #     space.spaceship_shoot()

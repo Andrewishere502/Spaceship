@@ -55,14 +55,6 @@ class Spaceship(Entity):
         self.asteriods_shot = 0
         return
 
-    def damage(self, hp: float) -> None:
-        self.health.reduce(hp)
-        return
-
-    def heal(self, hp: float) -> None:
-        self.health.increase(hp)
-        return
-
     def next_weapon(self):
         self.weapon_index += 1
         if self.weapon_index >= len(self.weapons_array):

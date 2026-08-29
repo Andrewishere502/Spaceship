@@ -1,3 +1,6 @@
+from utils import BoundedFloat
+
+
 class Health:
     def __init__(
         self,
@@ -12,37 +15,29 @@ class Health:
         :param max_hitpoints: The maximum hitpoints allowed.
         :type max_hitpoints: float
         """
-        self._hitpoints: float = hitpoints
-        self._max_hitpoints: float = max_hitpoints
+        self._hitpoints = BoundedFloat(
+            hitpoints,
+            0,
+            max_hitpoints,
+        )
         return
 
-    def reduce(self, hp: float) -> None:
+    def adjust_hitpoints(self, hp: float) -> None:
         """
-        Reduce the hitpoints to a minimum of zero.
+        Adjust the hitpoints to a minimum of zero.
 
-        :param hp: How much to reduce the current hitpoints by.
+        :param hp: How much to adjust the current hitpoints by.
+            Positive for increase, negative for decrease.
         :type hp: float
         """
-        # Limit the hitpoints to minimum 0.
-        self._hitpoints = max(self._hitpoints - hp, 0)
-        return
-
-    def increase(self, hp: float) -> None:
-        """
-        Increase the hitpoints to a maximum of `max_hitpoints`.
-
-        :param hp: How much to increase the current hitpoints by.
-        :type hp: float
-        """
-        # Limit the hitpoints to minimum 0.
-        self._hitpoints = max(self._hitpoints - hp, 0)
+        self._hitpoints += hp
         return
 
     def get_hp_ratio(self) -> float:
         """
         Return the ratio of current hitpoints to maximum hitpoints.
         """
-        return self._hitpoints / self._max_hitpoints
+        return self._hitpoints.get_normalized()
 
     @property
     def is_alive(self) -> bool:
@@ -57,11 +52,11 @@ class Health:
         """
         Return the current hitpoints.
         """
-        return self._hitpoints
+        return self._hitpoints.value
 
     @property
     def max_hitpoints(self) -> float:
         """
-        Return the maximum hitpoints.
+        Return the maximum allowed hitpoints.
         """
-        return self._max_hitpoints
+        return self._hitpoints.max_value
