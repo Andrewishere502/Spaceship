@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from entity import Entity
+from spaceship import Spaceship
 
 
 class Crate(Entity):
@@ -34,8 +35,14 @@ class HealthCrate(Crate):
         super().__init__(image_name, pos, vel, angular_pos, angular_vel)
         return
 
-    def do_action(self, spaceship):
-        spaceship.heal(spaceship.max_health - spaceship.health)
+    def do_action(self, spaceship: Spaceship) -> None:
+        """
+        Heal the spaceship up to full health.
+
+        :param spaceship: The spaceship to heal.
+        :type spaceship: Spaceship
+        """
+        spaceship.heal(spaceship.health.max_hitpoints - spaceship.health.hitpoints)
         return
 
 
