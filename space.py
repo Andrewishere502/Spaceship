@@ -152,7 +152,7 @@ class Space(pygame.surface.Surface):
         health_bar_width = 300
         health_bar_height = 10
         health_bar = pygame.surface.Surface((health_bar_width, health_bar_height))
-        ship_hp_rate = self.spaceship.health.get_hp_rate()
+        ship_hp_rate = self.spaceship.health.get_hp_ratio()
         if ship_hp_rate > 0.85:
             color = (84, 186, 0)
         elif ship_hp_rate > 0.70:
@@ -193,14 +193,14 @@ class Space(pygame.surface.Surface):
         ammo_bar_y = 580
         ammo_bar_width = 128
 
-        if hasattr(self.spaceship.weapon, 'image'):
-            weapon_image = self.spaceship.weapon.image
+        if hasattr(self.spaceship.get_weapon(), 'image'):
+            weapon_image = self.spaceship.get_weapon().image
             # weapon_image.convert_alpha()
 
             # blit the image of the weapon to the screen
             self.blit(weapon_image, (weapon_bar_x, weapon_bar_y))
 
-        ammo_percent = self.spaceship.weapon.ammo / self.spaceship.weapon.max_ammo
+        ammo_percent = self.spaceship.get_weapon().get_ammo_ratio()
 
         if ammo_percent > 0:
             pygame.draw.rect(self, (227, 189, 0), (weapon_bar_x, ammo_bar_y, ammo_bar_width * ammo_percent, 10))
@@ -396,9 +396,8 @@ class Space(pygame.surface.Surface):
     # Spaceship methods
     ##
 
-    def spaceship_shoot(self):
-        new_projectiles = self.spaceship.fire_weapon()
-        self.projectiles.extend(new_projectiles)
+    def spaceship_shoot(self) -> None:
+        self.projectiles.extend(self.spaceship.fire_weapon())
         return
 
     ##

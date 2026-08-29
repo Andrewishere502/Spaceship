@@ -3,7 +3,6 @@ from pathlib import Path
 from pygame import Vector2
 
 from weapons import (
-    Projectile,
     PhaseBlaster,
     PlasmaLauncher,
     IonFlak,
@@ -12,6 +11,15 @@ from weapons import (
 )
 from entity import Entity
 from components import Health
+
+
+type WeaponType = (
+    PhaseBlaster
+    | PlasmaLauncher
+    | IonFlak
+    | AlloyCannon
+    | IonRing
+)
 
 
 class Spaceship(Entity):
@@ -67,18 +75,26 @@ class Spaceship(Entity):
             self.weapon_index = len(self.weapons_array) - 1
         return
 
-    def fire_weapon(self) -> list[Projectile]:
-        return self.weapon.fire(
+    def fire_weapon(self):
+        """
+        Fire the spaceship's currently selected weapon.
+        """
+        new_projectiles = self.get_weapon().fire(
             self.movement.get_pos(),
             self.movement.get_angle(),
         )
+        return new_projectiles
+
+    def get_weapon(self) -> WeaponType:
+        """
+        Return the currently selected weapon.
+
+        :return: Currently selected weapon.
+        :rtype: WeaponType
+        """
+        return self.weapons_array[self.weapon_index]
 
     @property
     def is_alive(self) -> bool:
         return self.health.is_alive
-
-    @property
-    def weapon(self):
-        return self.weapons_array[self.weapon_index]
-
 

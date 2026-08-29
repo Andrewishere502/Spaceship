@@ -38,7 +38,7 @@ class Health:
         self._hitpoints = max(self._hitpoints - hp, 0)
         return
 
-    def get_hp_rate(self) -> float:
+    def get_hp_ratio(self) -> float:
         """
         Return the ratio of current hitpoints to maximum hitpoints.
         """

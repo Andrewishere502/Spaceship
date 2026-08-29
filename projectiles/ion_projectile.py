@@ -13,7 +13,7 @@ class IonProjectile(BaseProjectile):
     ):
         SPEED = 0.4
         DAMAGE = 1
-        TICK_LIFE = 10
+        TICK_LIFE = 20
 
         # Start pointed directly right, then rotate towards the initial
         # angle.

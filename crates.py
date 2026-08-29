@@ -52,9 +52,15 @@ class AmmoCrate(Crate):
         super().__init__(image_name, pos, vel, angular_pos, angular_vel)
         return
 
-    def do_action(self, spaceship):
+    def do_action(self, spaceship: Spaceship) -> None:
+        """
+        Refill the spaceship's currently selected ammo to 100%.
+
+        :param spaceship: The spaceship to refill ammo for.
+        :type spaceship: Spaceship
+        """
         refill_ammo = spaceship.weapon.max_ammo - spaceship.weapon.ammo
-        spaceship.weapon.refill(refill_ammo)
+        spaceship.weapon.adjust_ammo(refill_ammo)
         return
 
 
