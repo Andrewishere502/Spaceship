@@ -2,10 +2,10 @@ import math
 
 from pygame import Vector2
 
-from .projectile import Projectile
+from .base_projectile import BaseProjectile
 
 
-class IonProjectile(Projectile):
+class IonProjectile(BaseProjectile):
     def __init__(
         self,
         initial_pos: Vector2,

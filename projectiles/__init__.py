@@ -1,4 +1,4 @@
-from .projectile import Projectile
+from .base_projectile import BaseProjectile
 from .alloy_projectile import AlloyProjectile
 from .ion_projectile import IonProjectile
 from .phaser_projectile import PhaserProjectile

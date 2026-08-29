@@ -7,7 +7,7 @@ from pygame import Vector2
 from entity import Entity
 from asteroid import Asteroid
 from spaceship import Spaceship
-from projectiles import Projectile
+from projectiles import BaseProjectile
 from weapons import (
     PhaseBlaster,
     PlasmaLauncher,
@@ -52,7 +52,7 @@ class Space(pygame.surface.Surface):
             ),
             10,
         )
-        self.projectiles: list[Projectile] = []
+        self.projectiles: list[BaseProjectile] = []
 
         self.asteroids: list[Asteroid] = []
         start_asteroids = 3

@@ -6,7 +6,7 @@ from pygame import Vector2
 from entity import Entity
 
 
-class Projectile(Entity):
+class BaseProjectile(Entity):
     def __init__(
         self,
         image_name: str,
