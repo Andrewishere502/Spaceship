@@ -16,23 +16,23 @@ class Health:
         self._max_hitpoints: float = max_hitpoints
         return
 
-    def reduce(self, damage: float) -> None:
+    def reduce(self, hp: float) -> None:
         """
         Reduce the hitpoints to a minimum of zero.
 
-        :param damage: How much to reduce the current hitpoints by.
-        :type damage: float
+        :param hp: How much to reduce the current hitpoints by.
+        :type hp: float
         """
         # Limit the hitpoints to minimum 0.
-        self._hitpoints = max(self._hitpoints - damage, 0)
+        self._hitpoints = max(self._hitpoints - hp, 0)
         return
 
     def increase(self, hp: float) -> None:
         """
         Increase the hitpoints to a maximum of `max_hitpoints`.
 
-        :param damage: How much to increase the current hitpoints by.
-        :type damage: float
+        :param hp: How much to increase the current hitpoints by.
+        :type hp: float
         """
         # Limit the hitpoints to minimum 0.
         self._hitpoints = max(self._hitpoints - hp, 0)
