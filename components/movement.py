@@ -123,6 +123,12 @@ class Movement:
         return
 
     def set_angle(self, angle: float) -> None:
+        """
+        Set the entity's angle.
+
+        :param angle: New angle for the entity.
+        :type angle: float
+        """
         self._angle = angle
         return
 
