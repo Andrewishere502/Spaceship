@@ -1,6 +1,6 @@
+import math
 from pathlib import Path
 
-import pygame
 from pygame import Vector2
 
 from entity import Entity
@@ -13,7 +13,6 @@ class BaseProjectile(Entity):
         initial_pos: Vector2,
         initial_vel: Vector2,
         initial_angle: float,
-        max_vel_component: float,
         damage: float,
         tick_life: int,
     ):
@@ -25,7 +24,7 @@ class BaseProjectile(Entity):
             initial_vel=initial_vel,
             initial_angle=initial_angle,
             initial_avel=0,
-            max_vel_component=max_vel_component,
+            max_vel_component=math.sqrt(initial_vel.magnitude()),
             max_avel=0,
         )
 

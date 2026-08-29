@@ -73,6 +73,7 @@ class Spaceship(Entity):
         """
         new_projectiles = self.get_weapon().fire(
             self.movement.get_pos(),
+            self.movement.get_vel(),
             self.movement.get_angle(),
         )
         return new_projectiles

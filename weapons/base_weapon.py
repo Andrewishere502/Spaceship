@@ -5,21 +5,23 @@ import random
 import pygame
 from pygame import Vector2
 
+from components import Movement
 from utils import (
     CooldownTimer,
     BoundedFloat,
 )
 
 
-class AbstractWeapon[ProjectileType]:
+class BaseWeapon[ProjectileType]:
     def __init__(
         self,
         weapon_name: str,
         image_name: str,
         projectile_class: type[ProjectileType],
+        projectile_speed: float,
+        projectile_spread: float,
         max_ammo: int,
         ammo_per_use: int,
-        ammo_spread: float,
         fire_rate: datetime.timedelta,
     ) -> None:
         """
@@ -31,25 +33,30 @@ class AbstractWeapon[ProjectileType]:
         :type image_name: str
         :param projectile_class:
         :type projectile_class: type[ProjectileType]
+        :param projectile_speed: Speed of the projectiles relative to
+            the weapon when they are fired.
+        :type projectile_speed: float
+        :param projectile_spread: How much the angle of the created
+            projectile may deviate from the base angle, centered on
+            `base_angle`. In other words, the initial angle of a
+            produced projectile may be `base_angle - projectile_spread / 2`
+            to `base_angle + projectile_spread / 2`.
+        :type projectile_spread: float
         :param max_ammo:
         :type max_ammo: int
         :param ammo_per_use:
         :type ammo_per_use: int
-        :param ammo_spread: How much the angle of the created
-            projectile may deviate from the base angle, centered on
-            `base_angle`. In other words, the initial angle of a
-            produced projectile may be `base_angle - ammo_spread / 2`
-            to `base_angle + ammo_spread / 2`.
-        :type ammo_spread: float
         :param fire_rate:
         :type fire_rate: datetime.timedelta
         """
         image_path =  Path('Sprites', 'Weapons', image_name)
         self.image = pygame.image.load(image_path)
 
-        self._projectile_class = projectile_class
-
         self.name = weapon_name
+
+        self._projectile_class = projectile_class
+        self._projectile_speed = projectile_speed
+        self._projectile_spread = projectile_spread
 
         self._ammo = BoundedFloat(
             max_ammo,
@@ -57,7 +64,6 @@ class AbstractWeapon[ProjectileType]:
             max_ammo
         )
         self.ammo_per_use = ammo_per_use
-        self.ammo_spread = ammo_spread
 
         self._cooldown_timer = CooldownTimer(fire_rate)
         return
@@ -65,6 +71,7 @@ class AbstractWeapon[ProjectileType]:
     def fire(
         self,
         initial_pos: Vector2,
+        base_vel: Vector2,
         base_angle: float,
     ) -> list[ProjectileType]:
         """
@@ -72,6 +79,10 @@ class AbstractWeapon[ProjectileType]:
 
         :param initial_pos: Initial position of the projectile.
         :type initial_pos: Vector2
+        :param base_vel: Base velocity of the weapon, used to calculate
+            the initial velocity of the projectile(s) relative to the
+            frame of reference the weapon exists in.
+        :type base_vel: Vector2
         :param base_angle: Base angle for the projectile.
         :type base_angle: float
         :return: A list of projectiles.
@@ -89,16 +100,27 @@ class AbstractWeapon[ProjectileType]:
             return []
 
         # Calculate the minimum and maximum projectile angle.
-        min_angle = base_angle - self.ammo_spread / 2
-        max_angle = base_angle + self.ammo_spread / 2
+        min_angle = base_angle - self._projectile_spread / 2
+        max_angle = base_angle + self._projectile_spread / 2
+
 
         # Create one projectile for the number of projectiles that
         # should be fired.
         projectiles = []
         for _ in range(num_projectiles):
             initial_angle = self._get_random_float(min_angle, max_angle)
+
+            added_vel = Movement.make_vector2(
+                self._projectile_speed,
+                initial_angle,
+                is_reflect_y=True,
+            )
+            # Calculate the initial velocity, taking into account
+            initial_vel = base_vel + added_vel
+
             projectile = self._projectile_class(
                 initial_pos,  # type: ignore
+                initial_vel,
                 initial_angle,
             )
             projectiles.append(projectile)

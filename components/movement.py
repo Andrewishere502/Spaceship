@@ -157,3 +157,28 @@ class Movement:
         Return the current angular velocity.
         """
         return self._avel
+
+    ####### Static utilities ###################
+
+    @staticmethod
+    def make_vector2(
+        magnitude: float,
+        angle: float,
+        is_reflect_y: bool = False,
+    ) -> Vector2:
+        """
+        Create a vector with the given angle and magnitude.
+        """
+        # Reflect accross y-axis since negative Y is up.
+        Y_AXIS = Vector2(0, 1)
+
+        # Start pointed directly right, then rotate towards the initial
+        # angle.
+        vector = Vector2(magnitude, 0)
+        vector = vector.rotate(angle)
+
+        # Reflect across the y-axis, when going up means decreasing
+        # the Y value.
+        if is_reflect_y:
+            vector = vector.reflect(Y_AXIS)
+        return vector

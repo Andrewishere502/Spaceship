@@ -1,4 +1,4 @@
-from .abstract_weapon import AbstractWeapon
+from .base_weapon import BaseWeapon
 from .alloy_cannon import AlloyCannon
 from .ion_flak import IonFlak
 from .ion_ring import IonRing
