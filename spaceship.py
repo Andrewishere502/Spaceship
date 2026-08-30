@@ -26,7 +26,7 @@ class Spaceship(Entity):
     def __init__(
         self,
         initial_pos: Vector2,
-        health: float,
+        initial_health: float,
     ):
         IMAGE_PATH = Path('Sprites/spaceship-2.png')
         MAX_VEL_COMPONENT = 0.1
@@ -41,7 +41,7 @@ class Spaceship(Entity):
             max_avel=0,
         )
 
-        self.health = Health(health, health)
+        self.health = Health(initial_health, initial_health)
 
         self.weapons_array = [
             PhaseBlaster(),

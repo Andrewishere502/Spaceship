@@ -40,18 +40,18 @@ class Space(pygame.surface.Surface):
         self._is_asteroids_do_damage = is_asteroids_do_damage
         return
 
-    def reset_game(self):
+    def reset_game(
+        self,
+        spaceship: Spaceship
+    ) -> None:
+        """
+        Reset the game.
+        """
         self.level_tick_durration = 0
         self.level = 1
         self.ticks_until_asteroid = self.ticks_per_asteroid
 
-        self.spaceship = Spaceship(
-            Vector2(
-                self.get_width() // 2,
-                self.get_height() // 2,
-            ),
-            10,
-        )
+        self.set_spaceship(spaceship)
         self.projectiles: list[BaseProjectile] = []
 
         self.asteroids: list[Asteroid] = []
@@ -64,6 +64,20 @@ class Space(pygame.surface.Surface):
         self.effects = []
 
         self.clear()
+        return
+
+    def set_spaceship(
+        self,
+        spaceship: Spaceship,
+    ) -> None:
+        # spaceship = Spaceship(
+        #     Vector2(
+        #         self.get_width() // 2,
+        #         self.get_height() // 2,
+        #     ),
+        #     10,
+        # )
+        self.spaceship = spaceship
         return
 
     ##

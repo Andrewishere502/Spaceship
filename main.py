@@ -1,11 +1,17 @@
 from pathlib import Path
 import tomllib
 import math
+from functools import partial
+from collections.abc import Callable
 
 import pygame
 from pygame import Vector2
 
 from space import Space
+from spaceship import Spaceship
+from controllers import (
+    InputController,
+)
 
 
 class Display:
@@ -46,7 +52,69 @@ def mirror_y_axis(angle: float) -> float:
     return angle
 
 
-# Maximum frames per second
+def get_keyboard_mapping(
+    space: Space,
+    spaceship: Spaceship
+) -> dict[int, Callable]:
+    """
+    
+    """
+    INPUT_MAPPING = {
+        pygame.K_SPACE: space.spaceship_shoot,
+
+        # Arrow key movement mappings.
+        pygame.K_UP: partial(
+            spaceship.movement.apply_acceleration,
+            Vector2(0, -0.005)
+        ),
+        pygame.K_DOWN: partial(
+            spaceship.movement.apply_acceleration,
+            Vector2(0, 0.005)
+        ),
+        pygame.K_LEFT: partial(
+            spaceship.movement.apply_acceleration,
+            Vector2(-0.005, 0)
+        ),
+        pygame.K_RIGHT: partial(
+            spaceship.movement.apply_acceleration,
+            Vector2(0.005, 0)
+        ),
+
+        # WASD key movement mappings.
+        pygame.K_w: partial(  # Up
+            spaceship.movement.apply_acceleration,
+            Vector2(0, -0.005)
+        ),
+        pygame.K_a: partial(  # Left
+            spaceship.movement.apply_acceleration,
+            Vector2(-0.005, 0)
+        ),
+        pygame.K_s: partial(  # Down
+            spaceship.movement.apply_acceleration,
+            Vector2(0, 0.005)
+        ),
+        pygame.K_d: partial(  # Right
+            spaceship.movement.apply_acceleration,
+            Vector2(0.005, 0)
+        ),
+    }
+    return INPUT_MAPPING
+
+
+def make_spaceship(
+    initial_pos: Vector2,
+) -> Spaceship:
+    """
+    Return a new spaceship instance.
+    """
+    spaceship = Spaceship(
+        initial_pos,
+        10,
+    )
+    return spaceship
+
+
+# Maximum frames per second.
 FPS = 60
 
 SCREEN_WIDTH = 600
@@ -67,8 +135,21 @@ space = Space(
     SCREEN_HEIGHT,
     **settings
 )
-space.reset_game()
 
+# Reset the game with the spaceship.
+spaceship = make_spaceship(
+    Vector2(space.get_rect().center),
+)
+space.reset_game(spaceship)
+
+# Setup the spaceship controller.
+controller = InputController()
+controller.set_map(
+    get_keyboard_mapping(
+        space,
+        spaceship,
+    )
+)
 
 pause = False
 run = True
@@ -79,55 +160,56 @@ while run:
             run = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
-                space.reset_game()
+                spaceship = make_spaceship(
+                    Vector2(space.get_rect().center),
+                )
+                space.reset_game(spaceship)
+                controller.set_map(
+                    get_keyboard_mapping(
+                        space,
+                        spaceship,
+                    )
+                )
+            elif event.key == pygame.K_e:
+                spaceship.next_weapon()
+            elif event.key == pygame.K_q:
+                spaceship.prev_weapon()
             elif event.key == pygame.K_p:
                 pause = not pause
-            elif event.key == pygame.K_e:
-                space.spaceship.next_weapon()
-            elif event.key == pygame.K_q:
-                space.spaceship.prev_weapon()
-            elif event.key == pygame.K_SPACE:
-                if space.spaceship.is_alive:
-                    space.spaceship_shoot()
+            else:
+                controller.send(event.key)
+
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if space.spaceship.is_alive:
                 buttons_down = pygame.mouse.get_pressed()
                 if buttons_down[0]:
-                    space.spaceship_shoot()
-
-    # Hold to shoot!
-    keys_pressed = pygame.key.get_pressed()
-    if keys_pressed[pygame.K_SPACE]:
-        space.spaceship_shoot()
+                    space.spaceship_shoot()    
 
     display.clear()
-    if space.spaceship.is_alive:
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP] or keys[pygame.K_w]:  # move spaceship up
-            space.spaceship.movement.apply_acceleration(Vector2(0, -0.005))
-        if keys[pygame.K_DOWN] or keys[pygame.K_s]:  # move spaceship down
-            space.spaceship.movement.apply_acceleration(Vector2(0, 0.005))
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:  # move spaceship left
-            space.spaceship.movement.apply_acceleration(Vector2(-0.005, 0))
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:  # move spaceship right
-            space.spaceship.movement.apply_acceleration(Vector2(0.005, 0))
+    if spaceship.is_alive and not pause:
+        keys_pressed = pygame.key.get_pressed()
+        # For each mapped input, send it to the controller if it's
+        # down (pressed).
+        for key in set(controller._input_map.keys()):
+            is_down = keys_pressed[key]
+            if is_down:
+                controller.send(key)
 
-        if not pause:
-            # Point the spaceship at the mouse.
-            mouse_pos =  Vector2(*pygame.mouse.get_pos())
-            new_spaceship_angle = get_angle(
-                mouse_pos,
-                space.spaceship.movement.get_pos(),
-            )
-            # Mirror the angle acros the y-axis because decreasing y
-            # is up.
-            new_spaceship_angle = mirror_y_axis(new_spaceship_angle)
-            # Flip the spaceship's aim if the appropriate setting is
-            # active.
-            new_spaceship_angle += 180 * int(space._is_flip_aim)
-            space.spaceship.movement.set_angle(new_spaceship_angle)
+        # Point the spaceship at the mouse.
+        mouse_pos =  Vector2(*pygame.mouse.get_pos())
+        new_spaceship_angle = get_angle(
+            mouse_pos,
+            spaceship.movement.get_pos(),
+        )
+        # Mirror the angle acros the y-axis because decreasing y
+        # is up.
+        new_spaceship_angle = mirror_y_axis(new_spaceship_angle)
+        # Flip the spaceship's aim if the appropriate setting is
+        # active.
+        new_spaceship_angle += 180 * int(space._is_flip_aim)
+        spaceship.movement.set_angle(new_spaceship_angle)
 
-            space.step(delta_ms)
+        space.step(delta_ms)
 
         space.clear()
         space.draw_all()
