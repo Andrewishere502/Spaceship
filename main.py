@@ -32,26 +32,6 @@ class Display:
         return
 
 
-def get_angle(point1: Vector2, point2: Vector2) -> float:
-    """
-    Return the angle between two points in degrees.
-    """
-    dx = point2.x - point1.x
-    dy = point2.y - point1.y
-    # Convert to degrees.
-    angle = math.atan2(dy, dx) / math.pi * 180
-    return angle
-
-
-def mirror_y_axis(angle: float) -> float:
-    """
-    Return the given mangle mirrored across the y-axis.
-    """
-    angle *= -1
-    angle += 180
-    return angle
-
-
 def get_keyboard_mapping(
     space: Space,
     spaceship: Spaceship
@@ -196,18 +176,8 @@ while run:
                 controller.send(key)
 
         # Point the spaceship at the mouse.
-        mouse_pos =  Vector2(*pygame.mouse.get_pos())
-        new_spaceship_angle = get_angle(
-            mouse_pos,
-            spaceship.movement.get_pos(),
-        )
-        # Mirror the angle acros the y-axis because decreasing y
-        # is up.
-        new_spaceship_angle = mirror_y_axis(new_spaceship_angle)
-        # Flip the spaceship's aim if the appropriate setting is
-        # active.
-        new_spaceship_angle += 180 * int(space._is_flip_aim)
-        spaceship.movement.set_angle(new_spaceship_angle)
+        mouse_pos = Vector2(*pygame.mouse.get_pos())
+        spaceship.movement.point_to(mouse_pos)
 
         space.step(delta_ms)
 

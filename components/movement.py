@@ -99,6 +99,31 @@ class Movement:
                        * (-1 if self._vel.y < 0 else 1))
         return
 
+    def point_to(self, target_pos: Vector2) -> None:
+        """
+        Set the angle appropriately to point at the target.
+
+        NOTE: Automatically accounts for Pygame's inverted y-axis.
+
+        :param target_pos: Coordinates to point at.
+        :type target_pos: Vector2
+        """
+        # To get displacement from the spaceship to the mouse, subtract
+        # the mouse position from the spaceship position.
+        _, new_angle = (
+            self.get_pos()
+            - target_pos
+        ).as_polar()
+
+        # Invert the y-axis because Y=0 is at the top of Pygame
+        # surfaces.
+        new_angle = -new_angle + 180
+
+        # Mirror the angle across the y-axis because decreasing y
+        # is up.
+        self.set_angle(new_angle)
+        return
+
     ###### Setters ############################
 
     def set_pos(self, pos: Vector2) -> None:
@@ -164,21 +189,24 @@ class Movement:
     def make_vector2(
         magnitude: float,
         angle: float,
-        is_reflect_y: bool = False,
     ) -> Vector2:
         """
         Create a vector with the given angle and magnitude.
         """
-        # Reflect accross y-axis since negative Y is up.
-        Y_AXIS = Vector2(0, 1)
-
         # Start pointed directly right, then rotate towards the initial
         # angle.
         vector = Vector2(magnitude, 0)
         vector = vector.rotate(angle)
-
-        # Reflect across the y-axis, when going up means decreasing
-        # the Y value.
-        if is_reflect_y:
-            vector = vector.reflect(Y_AXIS)
         return vector
+
+    @staticmethod
+    def reflect_y_axis(
+        vector: Vector2,
+    ) -> Vector2:
+        """
+        Return the given vector, reflected across the y-axis.
+        """
+        # Reflect accross y-axis since sometimes negative Y is up.
+        # E.g. for pygame's surfaces.
+        Y_AXIS = Vector2(0, 1)
+        return vector.reflect(Y_AXIS)

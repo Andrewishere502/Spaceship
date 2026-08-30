@@ -113,8 +113,9 @@ class BaseWeapon[ProjectileType]:
             added_vel = Movement.make_vector2(
                 self._projectile_speed,
                 initial_angle,
-                is_reflect_y=True,
             )
+            # Reflect across y-axis since negative is up.
+            added_vel = Movement.reflect_y_axis(added_vel)
             # Calculate the initial velocity, taking into account
             initial_vel = base_vel + added_vel
 
