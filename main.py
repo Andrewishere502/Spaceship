@@ -165,7 +165,6 @@ while run:
                 if buttons_down[0]:
                     space.spaceship_shoot()    
 
-    display.clear()
     if spaceship.is_alive and not pause:
         keys_pressed = pygame.key.get_pressed()
         # For each mapped input, send it to the controller if it's
@@ -181,7 +180,6 @@ while run:
 
         space.step(delta_ms)
 
-        space.clear()
         space.draw_all()
 
     display.blit(space, (0, 0))

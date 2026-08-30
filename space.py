@@ -62,8 +62,6 @@ class Space(pygame.surface.Surface):
         self.crates: list[HealthCrate | AmmoCrate | WeaponCrate] = []
 
         self.effects = []
-
-        self.clear()
         return
 
     def set_spaceship(
@@ -140,7 +138,7 @@ class Space(pygame.surface.Surface):
     # Display methods
     ##
 
-    def clear(self):
+    def draw_background(self):
         self.fill((5, 0, 20))
         # self.fill((100, 100, 100))  # for higher contrast
         return
@@ -249,6 +247,8 @@ class Space(pygame.surface.Surface):
         return
 
     def draw_all(self):
+        self.draw_background()
+
         self.draw_overlay()
 
         for crate in self.crates:
