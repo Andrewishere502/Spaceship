@@ -25,14 +25,14 @@ type WeaponType = (
 class Spaceship(Entity):
     def __init__(
         self,
+        image_path: Path,
         initial_pos: Vector2,
         initial_health: float,
     ):
-        IMAGE_PATH = Path('Sprites/spaceship-2.png')
         MAX_VEL_COMPONENT = 0.1
 
         super().__init__(
-            IMAGE_PATH,
+            image_path,
             initial_pos=initial_pos,
             initial_vel=Vector2(0, 0),
             initial_angle=0,
