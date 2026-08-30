@@ -37,7 +37,7 @@ def get_keyboard_mapping(
     spaceship: Spaceship
 ) -> dict[int, Callable]:
     """
-    
+
     """
     INPUT_MAPPING = {
         pygame.K_SPACE: space.spaceship_shoot,
@@ -163,7 +163,7 @@ while run:
             if space.spaceship.is_alive:
                 buttons_down = pygame.mouse.get_pressed()
                 if buttons_down[0]:
-                    space.spaceship_shoot()    
+                    space.spaceship_shoot()
 
     if spaceship.is_alive and not pause:
         keys_pressed = pygame.key.get_pressed()

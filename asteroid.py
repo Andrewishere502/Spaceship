@@ -35,7 +35,7 @@ class Asteroid(Entity):
 
     def set_base_image(self, size: int):
         image_path = Path('Sprites', 'Asteroids', 'asteroid-{}.png'.format(size))
-        self.base_image = pygame.image.load(image_path).convert_alpha()
+        self.artist.set_base_image(image_path)
         return
 
     @property
@@ -57,7 +57,7 @@ class Asteroid(Entity):
         self.size = new_size
 
         # Reload the image.
-        self.set_base_image(self.size)
+        self.set_base_image(new_size)
 
         # Create a new asteroid deflected away from the original
         # asteroid.
