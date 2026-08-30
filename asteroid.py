@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import pygame
 from pygame import Vector2
 
 from entity import Entity
