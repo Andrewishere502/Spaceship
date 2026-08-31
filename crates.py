@@ -10,13 +10,12 @@ class Crate(Entity):
 
     def __init__(
         self,
-        image_name,
+        image_path,
         initial_pos,
         initial_vel,
         initial_angle,
         initial_avel,
     ) -> None:
-        image_path = Path('Sprites', 'Crates', image_name)
         super().__init__(
             image_path,
             initial_pos,
@@ -31,8 +30,8 @@ class Crate(Entity):
 
 class HealthCrate(Crate):
     def __init__(self, pos, vel, angular_pos, angular_vel):
-        image_name = 'health-crate.png'
-        super().__init__(image_name, pos, vel, angular_pos, angular_vel)
+        image_path = Path('Sprites', 'Crates', 'health-crate.png')
+        super().__init__(image_path, pos, vel, angular_pos, angular_vel)
         return
 
     def do_action(self, spaceship: Spaceship) -> None:
@@ -48,8 +47,8 @@ class HealthCrate(Crate):
 
 class AmmoCrate(Crate):
     def __init__(self, pos, vel, angular_pos, angular_vel):
-        image_name = 'ammo-crate.png'
-        super().__init__(image_name, pos, vel, angular_pos, angular_vel)
+        image_path = Path('Sprites', 'Crates', 'ammo-crate.png')
+        super().__init__(image_path, pos, vel, angular_pos, angular_vel)
         return
 
     def do_action(self, spaceship: Spaceship) -> None:
@@ -64,9 +63,21 @@ class AmmoCrate(Crate):
 
 
 class WeaponCrate(Crate):
-    def __init__(self, pos, vel, angular_pos, angular_vel, weapon):
-        image_name = 'weapon-crate.png'
-        super().__init__(image_name, pos, vel, angular_pos, angular_vel)
+    def __init__(
+        self,
+        pos,
+        vel,
+        angular_pos,
+        angular_vel,
+        weapon,
+    ):
+        super().__init__(
+            weapon._item_image_path,
+            pos,
+            vel,
+            angular_pos,
+            angular_vel,
+        )
         self.weapon = weapon
         return
 

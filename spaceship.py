@@ -116,6 +116,28 @@ class Spaceship(Entity):
         self.asteriods_shot = 0
         return
 
+    def get_image(self) -> pygame.surface.Surface:
+        """
+        Return the spaceship's image, rotated to the direction the
+        spaceship is facing. Includes the currently equiped weapon.
+        """
+        # Get the angle of rotation for the spaceship.
+        angle = self.movement.get_angle()
+
+        # Get the base spaceship image.
+        spaceship_image = self.artist.get_image(angle)
+
+        # Get the weapon item image to draw on the spaceship.
+        weapon_item_image = self.get_weapon().get_item_image(angle)
+
+        # Draw the weapon on top of the spaceship image, aligning their
+        # center points.
+        spaceship_image.blit(
+            weapon_item_image,
+            weapon_item_image.get_rect(center=spaceship_image.get_rect().center)
+        )
+        return spaceship_image
+
     def next_weapon(self):
         self.weapon_index += 1
         if self.weapon_index >= len(self.weapons_array):

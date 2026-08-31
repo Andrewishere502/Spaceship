@@ -257,11 +257,11 @@ class Space(pygame.surface.Surface):
         for asteroid in self.asteroids:
             self.draw_entity(asteroid)
 
-        for projectile in self.projectiles:
-            self.draw_entity(projectile)
-
         if self.spaceship.is_alive:
             self.draw_entity(self.spaceship)
+
+        for projectile in self.projectiles:
+            self.draw_entity(projectile)
 
         self.draw_effects()
         return

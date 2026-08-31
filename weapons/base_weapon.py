@@ -5,7 +5,10 @@ import random
 import pygame
 from pygame import Vector2
 
-from components import Movement
+from components import (
+    Movement,
+    Artist,
+)
 from utils import (
     CooldownTimer,
     BoundedFloat,
@@ -49,8 +52,13 @@ class BaseWeapon[ProjectileType]:
         :param fire_rate:
         :type fire_rate: datetime.timedelta
         """
-        image_path =  Path('Sprites', 'Weapons', image_name)
+        weapon_image_dir = Path('Sprites', 'Weapons')
+        image_path = weapon_image_dir / image_name
         self.image = pygame.image.load(image_path)
+
+        item_image_path = weapon_image_dir / 'items' / image_name
+        self._item_image_path = item_image_path
+        self.item_artist = Artist(item_image_path)
 
         self.name = weapon_name
 
@@ -67,6 +75,9 @@ class BaseWeapon[ProjectileType]:
 
         self._cooldown_timer = CooldownTimer(fire_rate)
         return
+
+    def get_item_image(self, angle: float) -> pygame.surface.Surface:
+        return self.item_artist.get_image(angle)
 
     def fire(
         self,
