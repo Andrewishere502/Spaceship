@@ -86,10 +86,7 @@ def make_spaceship(
     """
     Return a new spaceship instance.
     """
-    IMAGE_PATH = Path('Sprites/spaceship-2.png')
-    # IMAGE_PATH = Path('Sprites/dev/square-64x64.png')
     spaceship = Spaceship(
-        IMAGE_PATH,
         initial_pos,
         10,
     )

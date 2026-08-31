@@ -1,5 +1,7 @@
 from pathlib import Path
+import random
 
+import pygame
 from pygame import Vector2
 
 from weapons import (
@@ -25,14 +27,20 @@ type WeaponType = (
 class Spaceship(Entity):
     def __init__(
         self,
-        image_path: Path,
         initial_pos: Vector2,
         initial_health: float,
     ):
+        SPACESHIP_SPRITE_DIR = Path('Sprites/spaceships/small/')
         MAX_VEL_COMPONENT = 0.1
 
+
+        body_image_path = SPACESHIP_SPRITE_DIR / 'body.png'
+        head_image_path = SPACESHIP_SPRITE_DIR / 'heads'
+        left_wing_image_path = SPACESHIP_SPRITE_DIR / 'wings'
+        tail_image_path = SPACESHIP_SPRITE_DIR / 'tails'
+
         super().__init__(
-            image_path,
+            body_image_path,
             initial_pos=initial_pos,
             initial_vel=Vector2(0, 0),
             initial_angle=0,
@@ -40,6 +48,59 @@ class Spaceship(Entity):
             max_vel_component=MAX_VEL_COMPONENT,
             max_avel=0,
         )
+
+        ####### Configure spaceship image ########
+        get_is_png = lambda file_path: file_path.suffix == '.png'
+        head_image_path = random.choice(
+            list(
+                filter(
+                    get_is_png,
+                    head_image_path.iterdir(),
+                )
+            )
+        )
+        left_wing_image_path = random.choice(
+            list(
+                filter(
+                    get_is_png,
+                    left_wing_image_path.iterdir(),
+                )
+            )
+        )
+        tail_image_path = random.choice(
+            list(
+                filter(
+                    get_is_png,
+                    tail_image_path.iterdir(),
+                )
+            )
+        )
+
+        head_pos = (24, 8)
+        head_image = pygame.image.load(head_image_path)
+        head_rect = head_image.get_rect(topleft=head_pos)
+
+        left_wing_pos = (0, 0)
+        left_wing_image = pygame.image.load(left_wing_image_path)
+        left_wing_rect = left_wing_image.get_rect(topleft=left_wing_pos)
+
+        right_wing_pos = (0, 24)
+        right_wing_image = pygame.transform.flip(
+            left_wing_image,
+            False,
+            True,
+        )
+        right_wing_rect = right_wing_image.get_rect(topleft=right_wing_pos)
+
+        tail_pos = (0, 8)
+        tail_image = pygame.image.load(tail_image_path)
+        tail_rect = tail_image.get_rect(topleft=tail_pos)
+
+        self.artist.blit(head_image, head_rect)
+        self.artist.blit(left_wing_image, left_wing_rect)
+        self.artist.blit(right_wing_image, right_wing_rect)
+        self.artist.blit(tail_image, tail_rect)
+        #########
 
         self.health = Health(initial_health, initial_health)
 
