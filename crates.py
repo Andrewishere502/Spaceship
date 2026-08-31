@@ -70,16 +70,28 @@ class WeaponCrate(Crate):
         self.weapon = weapon
         return
 
-    def do_action(self, spaceship):
-        # Check to see if the weapon is repeated in weapons_array.
-        weapon_repeated = False
-        for weapon in spaceship.weapons_array:
-            # If the weapon is in weapons_array already, refill it.
-            if weapon.name == self.weapon.name:
-                weapon.refill()
-                break
+    def do_action(self, spaceship: Spaceship):
+        """
+        Add the weapon to the spaceship's weapons array. If the weapon
+        is already in the spaceship's weapons array, refill it.
 
-        # if the weapon is not in weapons_array already, add it.
-        if not weapon_repeated:
+        :param spaceship: The spaceship to add the weapon to.
+        :type spaceship: Spaceship
+        """
+        # Get any weapon in the spaceship's weapons array that is of
+        # the exact same type as the weapon in this crate. Does not
+        # include subclasses.
+        weapon_type_matches = [weapon for weapon in spaceship.weapons_array
+                             if type(weapon) == type(self.weapon)]
+
+        if len(weapon_type_matches) > 0:
+            # Refill all weapons of matching type in the spaceship's
+            # weapons array.
+            for weapon in weapon_type_matches:
+                weapon.refill()
+        else:
+            # If the weapon wasn't in the spaceship's weapons array,
+            # add it.
             spaceship.weapons_array.append(self.weapon)
+
         return
