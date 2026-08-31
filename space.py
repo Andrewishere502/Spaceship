@@ -24,9 +24,6 @@ class Space(pygame.surface.Surface):
         self,
         width: int,
         height: int,
-        is_combine_asteroids: bool = False,
-        is_flip_aim: bool = False,
-        is_speed_up_when_loop: bool = False,
         is_asteroids_do_damage: bool = True,
     ) -> None:
         super().__init__((width, height))
@@ -34,9 +31,6 @@ class Space(pygame.surface.Surface):
         self.font_big = pygame.font.SysFont('arial', 200)
         self.font_small = pygame.font.SysFont('arial', 50)
 
-        self._is_combine_asteroids = is_combine_asteroids
-        self._is_flip_aim = is_flip_aim
-        self._is_speed_up_when_loop = is_speed_up_when_loop
         self._is_asteroids_do_damage = is_asteroids_do_damage
         return
 
