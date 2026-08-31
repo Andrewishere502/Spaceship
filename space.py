@@ -58,17 +58,7 @@ class Space(pygame.surface.Surface):
         self.effects = []
         return
 
-    def set_spaceship(
-        self,
-        spaceship: Spaceship,
-    ) -> None:
-        # spaceship = Spaceship(
-        #     Vector2(
-        #         self.get_width() // 2,
-        #         self.get_height() // 2,
-        #     ),
-        #     10,
-        # )
+    def set_spaceship(self, spaceship: Spaceship) -> None:
         self.spaceship = spaceship
         return
 
@@ -199,12 +189,9 @@ class Space(pygame.surface.Surface):
         ammo_bar_y = 580
         ammo_bar_width = 128
 
-        if hasattr(self.spaceship.get_weapon(), 'image'):
-            weapon_image = self.spaceship.get_weapon().image
-            # weapon_image.convert_alpha()
-
-            # blit the image of the weapon to the screen
-            self.blit(weapon_image, (weapon_bar_x, weapon_bar_y))
+        weapon_image = self.spaceship.get_weapon().image
+        # blit the image of the weapon to the screen
+        self.blit(weapon_image, (weapon_bar_x, weapon_bar_y))
 
         ammo_percent = self.spaceship.get_weapon().get_ammo_ratio()
 
