@@ -144,70 +144,124 @@ class Space(pygame.surface.Surface):
         y_pos = pos[1] - text_height // 2
         return (x_pos, y_pos)
 
-    def draw_health_bar(self):
-        health_bar_width = 300
-        health_bar_height = 10
-        health_bar = pygame.surface.Surface((health_bar_width, health_bar_height))
-        ship_hp_rate = self.spaceship.health.get_hp_ratio()
-        if ship_hp_rate > 0.85:
-            color = (84, 186, 0)
-        elif ship_hp_rate > 0.70:
-            color = (186, 186, 0)
-        elif ship_hp_rate > 0.50:
-            color = (186, 118, 0)
-        elif ship_hp_rate > 0.20:
-            color = (186, 71, 0)
-        else:
-            color = (186, 12, 0)
-        pygame.draw.rect(health_bar, (112, 112, 112), (0, 0, health_bar_width, health_bar_height))
-        color_x_pos = health_bar.get_width() // 2 - health_bar_width * ship_hp_rate // 2
-        if ship_hp_rate > 0:
-            pygame.draw.rect(health_bar, color, (color_x_pos, 0, health_bar_width * ship_hp_rate, health_bar_height))
-        health_bar.set_alpha(150)
+    def draw_health_bar(self, padx: float, pady: float) -> None:
+        HEALTH_BAR_WIDTH = 300
+        HEALTH_BAR_HEIGHT = 10
+        HEALTH_BAR_BASE_COLOR = (112, 112, 112)
 
-        bar_x_pos = self.get_width() // 2 - health_bar_width // 2
-        bar_y_pos = self.get_height() - 20
-        self.blit(health_bar, (bar_x_pos, bar_y_pos))
+        HEALTH_BAR_X = padx
+        HEALTH_BAR_Y = self.get_height() - HEALTH_BAR_HEIGHT - pady
+
+        # Draw the empty health bar so we can draw the health level
+        # ontop of it.
+        pygame.draw.rect(
+            self,
+            HEALTH_BAR_BASE_COLOR,
+            (
+                HEALTH_BAR_X,
+                HEALTH_BAR_Y,
+                HEALTH_BAR_WIDTH,
+                HEALTH_BAR_HEIGHT,
+            )
+        )
+
+        ship_hp_rate = self.spaceship.health.get_hp_ratio()
+        if ship_hp_rate > 0.75:
+            color = (14, 173, 0)
+        elif ship_hp_rate > 0.50:
+            color = (191, 201, 0)
+        elif ship_hp_rate > 0.25:
+            color = (209, 112, 0)
+        else:
+            color = (189, 3, 0)
+
+        if ship_hp_rate > 0:
+            pygame.draw.rect(
+                self,
+                color,
+                (
+                    HEALTH_BAR_X,
+                    HEALTH_BAR_Y,
+                    HEALTH_BAR_WIDTH * ship_hp_rate,
+                    HEALTH_BAR_HEIGHT,
+                )
+            )
         return
 
     def draw_level_progress(self):
-        level_bar_width = self.get_width()
-        level_bar_height = 5
-        level_bar = pygame.surface.Surface((level_bar_width, level_bar_height))
-        level_progress = self.level_tick_durration / self.ticks_per_level
-        pygame.draw.rect(level_bar, (112, 112, 112), (0, 0, level_bar_width, level_bar_height))
-        if level_progress > 0:
-            pygame.draw.rect(level_bar, (219, 219, 219), (0, 0, level_bar_width * level_progress, level_bar_height))
-        level_bar.set_alpha(150)
-        self.blit(level_bar, (0, 0))
+        LEVEL_BAR_WIDTH = self.get_width()
+        LEVEL_BAR_HEIGHT = 5
+        LEVEL_BAR_BASE_COLOR = (112, 112, 112)
+        LEVEL_BAR_TOP_COLOR = (219, 219, 219)
+
+        pygame.draw.rect(
+            self,
+            LEVEL_BAR_BASE_COLOR,
+            (
+                0,
+                0,
+                LEVEL_BAR_WIDTH,
+                LEVEL_BAR_HEIGHT,
+            )
+        )
+
+        level_progress_ratio = self.level_tick_durration / self.ticks_per_level
+        if level_progress_ratio > 0:
+            pygame.draw.rect(
+                self,
+                LEVEL_BAR_TOP_COLOR,
+                (
+                    0,
+                    0,
+                    LEVEL_BAR_WIDTH * level_progress_ratio,
+                    LEVEL_BAR_HEIGHT,
+                )
+            )
         return
 
-    def draw_weapon(self):
-        weapon_bar_x = 462
-        weapon_bar_y = 513
+    def draw_weapon(self, padx: float, pady: int):
+        AMMO_BAR_COLOR = (227, 189, 0)
+        AMMO_BAR_HEIGHT = 10
 
-        ammo_bar_y = 580
-        ammo_bar_width = 128
-
+        # Draw the image of the weapon on the screen.
         weapon_image = self.spaceship.get_weapon().image
-        # blit the image of the weapon to the screen
-        self.blit(weapon_image, (weapon_bar_x, weapon_bar_y))
+        weapon_width, weapon_height = weapon_image.get_rect().size
+        weapon_x = self.get_width() - weapon_width - padx
+        weapon_y = self.get_height() - weapon_height - pady
+        self.blit(weapon_image, (weapon_x, weapon_y - AMMO_BAR_HEIGHT))
 
+        # Only draw the ammo bar if there is some ammo remaining.
         ammo_percent = self.spaceship.get_weapon().get_ammo_ratio()
-
         if ammo_percent > 0:
-            pygame.draw.rect(self, (227, 189, 0), (weapon_bar_x, ammo_bar_y, ammo_bar_width * ammo_percent, 10))
-
+            pygame.draw.rect(
+                self,
+                AMMO_BAR_COLOR,
+                (
+                    weapon_x,
+                    self.get_height() - AMMO_BAR_HEIGHT - pady,
+                    weapon_width * ammo_percent,
+                    AMMO_BAR_HEIGHT,
+                )
+            )
         return
 
     def draw_overlay(self):
+        OVERLAY_PADX = 10
+        OVERLAY_PADY = 10
+
+        self.draw_weapon(
+            OVERLAY_PADX,
+            OVERLAY_PADY,
+        )
+
         text = str(self.level)
         pos = self.text_to_center_point(text, self.font_big, (self.get_width() // 2, self.get_height() // 2))
         self.write_big(text, (72, 66, 84), pos)
 
-        self.draw_weapon()
-
-        self.draw_health_bar()
+        self.draw_health_bar(
+            OVERLAY_PADX,
+            OVERLAY_PADY,
+        )
 
         self.draw_level_progress()
 
@@ -246,6 +300,8 @@ class Space(pygame.surface.Surface):
 
         self.draw_effects()
         return
+
+    # def draw_rect
 
     ##
     # Misc methods
