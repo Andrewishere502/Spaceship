@@ -13,7 +13,7 @@ class IonProjectile(BaseProjectile):
         initial_angle: float,
     ):
         DAMAGE = 1
-        TICK_LIFE = 20
+        TICK_LIFE = 25
 
         super().__init__(
             'ion-projectile.png',

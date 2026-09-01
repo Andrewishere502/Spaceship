@@ -13,7 +13,7 @@ class PlasmaProjectile(BaseProjectile):
         initial_angle: float,
     ):
         DAMAGE = 2
-        TICK_LIFE = 80
+        TICK_LIFE = 150
 
         super().__init__(
             'plasma-projectile.png',

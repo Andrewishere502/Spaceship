@@ -12,7 +12,7 @@ class IonRing(BaseWeapon[IonProjectile]):
         projectile_spread = 360
         max_ammo = 720  # 10 shots of 72
         ammo_per_use = 72
-        fire_rate = datetime.timedelta(milliseconds=100)
+        fire_rate = datetime.timedelta(milliseconds=500)
         super().__init__(
             weapon_name,
             image_name,

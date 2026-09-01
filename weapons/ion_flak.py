@@ -8,11 +8,11 @@ class IonFlak(BaseWeapon[IonProjectile]):
     def __init__(self):
         weapon_name = 'ion flak'
         image_name = 'ion-flak.png'
-        projectile_speed = 0.4
+        projectile_speed = 0.40
         projectile_spread = 30
         max_ammo = 800  # 100 shots of 8
         ammo_per_use = 8
-        fire_rate = datetime.timedelta(milliseconds=100)
+        fire_rate = datetime.timedelta(milliseconds=180)
         super().__init__(
             weapon_name,
             image_name,

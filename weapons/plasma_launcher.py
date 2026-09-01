@@ -12,7 +12,7 @@ class PlasmaLauncher(BaseWeapon[PlasmaProjectile]):
         projectile_spread = 0
         max_ammo = 50
         ammo_per_use = 1
-        fire_rate = datetime.timedelta(milliseconds=100)
+        fire_rate = datetime.timedelta(milliseconds=120)
         super().__init__(
             weapon_name,
             image_name,

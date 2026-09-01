@@ -13,7 +13,7 @@ class PhaserProjectile(BaseProjectile):
         initial_angle: float,
     ):
         DAMAGE = 1
-        TICK_LIFE = 50
+        TICK_LIFE = 75
 
         super().__init__(
             'phaser-projectile.png',
