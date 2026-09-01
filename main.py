@@ -94,10 +94,10 @@ def make_spaceship(
 
 
 # Maximum frames per second.
-FPS = 60
+FPS = 90
 
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 800
 
 SETTINGS_PATH = Path('settings.toml')
 
