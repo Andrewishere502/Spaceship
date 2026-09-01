@@ -31,8 +31,7 @@ class Spaceship(Entity):
         initial_health: float,
     ):
         SPACESHIP_SPRITE_DIR = Path('Sprites/spaceships/small/')
-        MAX_VEL_COMPONENT = 0.1
-
+        MAX_VEL_COMPONENT = 0.13
 
         body_image_path = SPACESHIP_SPRITE_DIR / 'body.png'
         head_image_path = SPACESHIP_SPRITE_DIR / 'heads'
