@@ -1,4 +1,4 @@
-import math
+import datetime
 
 from pygame import Vector2
 
@@ -13,7 +13,7 @@ class IonProjectile(BaseProjectile):
         initial_angle: float,
     ):
         DAMAGE = 1
-        TICK_LIFE = 25
+        LIFESPAN = datetime.timedelta(milliseconds=333)
 
         super().__init__(
             'ion-projectile.png',
@@ -21,7 +21,7 @@ class IonProjectile(BaseProjectile):
             initial_vel,
             initial_angle,
             DAMAGE,
-            TICK_LIFE,
+            LIFESPAN,
         )
         return
 

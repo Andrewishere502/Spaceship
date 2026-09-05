@@ -397,7 +397,7 @@ class Space(pygame.surface.Surface):
                 )
             )
 
-            if not projectile.dead:  # projectile is still 'alive'
+            if not projectile.get_is_done():
                 collide_i = projectile.get_hitbox().collidelist(asteroid_hitboxes)
                 if collide_i > -1:  # projectile hit an asteroid
                     asteroid_point_val = self.asteroids[collide_i].point_value

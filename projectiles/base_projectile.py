@@ -1,9 +1,11 @@
 import math
+import datetime
 from pathlib import Path
 
 from pygame import Vector2
 
 from entity import Entity
+from utils import CooldownTimer
 
 
 class BaseProjectile(Entity):
@@ -14,7 +16,7 @@ class BaseProjectile(Entity):
         initial_vel: Vector2,
         initial_angle: float,
         damage: float,
-        tick_life: int,
+        lifespan: datetime.timedelta,
     ):
         IMAGE_PATH = Path('Sprites', 'Projectiles', image_name)
 
@@ -28,19 +30,21 @@ class BaseProjectile(Entity):
             max_avel=0,
         )
 
-        self.damage = damage  # sizes to decrease asteroid by
-        self.tick_life = tick_life
+        # How much to reduce an asteroid's size by.
+        self.damage = damage  
+
+        # 
+        self._lifespan_tracker = CooldownTimer(lifespan)
         return
 
-    def step(self, dt: float) -> None:
+    def get_is_done(self) -> bool:
         """
-        Update the projectile's movement component.
+        Return `True` if the projectile's lifespan is complete,
+        otherwise `False`.
         """
-        super().step(dt)
+        # If the cooldown timer object "is read" that means the
+        # timer has passed the threshold and thus the projectile has
+        # reached the end of its lifespan.
+        return self._lifespan_tracker.get_is_ready()
 
-        self.tick_life -= 1
-        return
-
-    @property
-    def dead(self):
-        return self.tick_life <= 0
+    

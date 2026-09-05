@@ -1,4 +1,4 @@
-import math
+import datetime
 
 from pygame import Vector2
 
@@ -13,7 +13,7 @@ class AlloyProjectile(BaseProjectile):
         initial_angle: float,
     ):
         DAMAGE = 1
-        TICK_LIFE = 200
+        LIFESPAN = datetime.timedelta(milliseconds=2250)
 
         super().__init__(
             'alloy-projectile.png',
@@ -21,6 +21,6 @@ class AlloyProjectile(BaseProjectile):
             initial_vel,
             initial_angle,
             DAMAGE,
-            TICK_LIFE,
+            LIFESPAN,
         )
         return
