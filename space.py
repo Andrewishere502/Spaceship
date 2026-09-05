@@ -485,16 +485,6 @@ class Space(pygame.surface.Surface):
         self.asteroids.append(asteriod)
         return
 
-    def merge_asteroids(self, asteroid1, asteroid2):
-        asteroid1.accelerate(tuple(map(lambda c: c * 0.2, asteroid2.vel)))
-
-        asteroid1.size += asteroid2.size
-        if asteroid1.size > 5:
-            asteroid1.size = 5
-
-        asteroid1.reload_base_image()
-        return
-
     ##
     # Power up methods
     ##
