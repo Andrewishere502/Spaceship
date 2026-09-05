@@ -1,147 +1,153 @@
-from collections.abc import Sequence
-
 import pygame
-from pygame import Vector2
 
-from projectiles import BaseProjectile
-from weapons import (
-    BaseWeapon,
-    PhaseBlaster,
-    PlasmaLauncher,
-    IonFlak,
-    AlloyCannon,
-    IonRing,
-)
-from components import Movement
-from .ship_module import ShipModule
-from .weapon_system import WeaponSystem
+from .ship_modules.base_ship_module import BaseShipModule
 
 
 class ShipChassis:
     def __init__(
         self,
-        width: int,
-        height: int,
-        initial_pos: Vector2,
-        initial_vel: Vector2,
-        initial_angle: float,
-        initial_avel: float,
-        max_vel_component: float,
-        max_avel: float,
-        body_module: ShipModule,
-        left_wing_module: ShipModule,
-        right_wing_module: ShipModule,
-        nose_module: ShipModule,
-        tail_module: ShipModule,
-        weapon_system: WeaponSystem,
-    ):
-        self.movement = Movement(
-            initial_pos=initial_pos,
-            initial_vel=initial_vel,
-            initial_angle=initial_angle,
-            initial_avel=initial_avel,
-            max_vel_component=max_vel_component,
-            max_avel=max_avel,
-        )
+        module_layout: dict[tuple[float, float], BaseShipModule],
+    ) -> None:
+        """
+        Initialize the ship chassis.
 
-        self._width = width
-        self._height = height
+        :param module_layout:
+        :type module_layout: dict[tuple[float, float], BaseShipModule]
+        """
+        # Construct the dict storing the current layout for this
+        # chassis. I.e. what modules are actually in each available
+        # position.
+        self._module_layout = module_layout
 
-        self.weapon_system = weapon_system
-
-        # Define the pieces attached to the chassis to make up the
-        # entire spaceship.
-        self._ship_modules = [
-            body_module,
-            left_wing_module,
-            right_wing_module,
-            nose_module,
-            tail_module,
-        ]
-        self.load_base_image()
-
-        self.score = 0
-        self.asteriods_shot = 0
+        # Construct the dict storing what modules types are allowed in
+        # each available position.
+        self._module_type_layout: dict[tuple[float, float], type[BaseShipModule]] = {}
+        for pos, module in self._module_layout.items():
+            self._module_type_layout[pos] = type(module)
         return
 
-    def step(self, dt: float) -> None:
+    def set_module(
+        self,
+        pos: tuple[float, float],
+        new_module: BaseShipModule,
+    ) -> BaseShipModule:
         """
-        Update the entity's movement component.
+        :param pos:
+        :type pos: tuple[float, float]
+        :param new_module:
+        :type new_module: BaseShipModule
+        :return:
+        :rtype: BaseShipModule
+        :raise ValueError: If the given position is not a valid key in
+            the `module_type_layout` attribute.
         """
-        self.movement.step(dt)
-        return
+        self._validate_pos(pos)  # Validate the position.
 
-    def fire_weapon(self) -> Sequence[BaseProjectile]:
-        """
+        # If the given module is not of the allowed type, raise an
+        # error.
+        valid_module_type = self._module_type_layout[pos]
+        if not isinstance(new_module, valid_module_type):
+            raise ValueError(
+                f'Module type {type(new_module)} is not allowed type {valid_module_type}'
+            )
 
-        """
-        new_projectiles = self.weapon_system.get_weapon().fire(
-            self.movement.get_pos(),
-            self.movement.get_vel(),
-            self.movement.get_angle(),
-        )
-        return new_projectiles
+        # Replace the old module with the new one, then return the old
+        # module.
+        old_module = self._module_layout.pop(pos)
+        self._module_layout[pos] = new_module
+        return old_module
 
-    def get_image(self) -> pygame.surface.Surface:
+    def get_module(
+        self,
+        pos: tuple[float, float],
+    ) -> BaseShipModule:
+        """
+        Return the module at the given position.
+
+        :param pos:
+        :type pos: tuple[float, float]
+        :return:
+        :rtype: BaseShipModule
+        :raise ValueError: If the given position is not a valid key in
+            the `module_type_layout` attribute.
+        """
+        self._validate_pos(pos)  # Validate the position.
+        return self._module_layout[pos]
+
+    def get_image(self, angle: float) -> pygame.surface.Surface:
         """
         Return the spaceship's image, rotated to the direction the
         spaceship is facing. Includes the currently equiped weapon.
+
+        :param angle: Angle to rotate the base image, in degrees.
+        :type angle: float
+        :return: The rotated image of the ship chassis and its
+            components.
+        :rtype: pygame.surface.Surface
         """
-        image = self.get_base_image().copy()
+        image = self.base_image.copy()
 
         # Rotate the image in the direction the chassis is facing.
-        angle = self.movement.get_angle()
         image = pygame.transform.rotate(image, angle)
-
-        # Get the weapon item image to draw on the spaceship.
-        weapon_item_image = self.weapon_system.get_weapon().get_item_image(angle)
-
-        # Get the position of the weapon item image relative to the
-        # chassis image.
-        weapon_item_image_pos = image.get_rect().center + self.weapon_system.pos
-
-        # Draw the weapon on top of the spaceship image, aligning their
-        # center points.
-        image.blit(
-            weapon_item_image,
-            # Align the weapon to the weapon system's position.
-            weapon_item_image.get_rect(center=weapon_item_image_pos)
-        )
         return image
-
-    def get_weapon(self) -> BaseWeapon:
-        return self.weapon_system.get_weapon()
-
-    def get_hitbox(self):
-        # Get the unrotated image.
-        image = self.get_base_image()
-
-        pos = self.movement.get_pos()
-        hb_width = image.get_width()
-        hb_height = image.get_height()
-        rect = pygame.Rect(pos.x, pos.y, hb_width, hb_height)
-        rect.center = (pos.x, pos.y)
-        return rect
-
-    def get_base_image(self) -> pygame.surface.Surface:
-        """
-        Return the base image.
-        """
-        return self._base_image
 
     def load_base_image(self) -> None:
         """
         Initialize the base image by combining the images of all ship
         modules onto the same surface.
         """
-        # Draw the image of each module onto the base image.
-        base_image = pygame.surface.Surface((self._width, self._height))
+        # Calculate the necessary width and height of the assembled
+        # module images.
+        combined_width = 0
+        combined_height = 0
+        for pos, module in self._module_layout.items():
+            module_image = module.artist.get_image(0)
+            required_width = pos[0] + module_image.get_width()
+            required_height = pos[1] + module_image.get_height()
+            if combined_width < required_width:
+                combined_width = required_width
+            if combined_height < required_height:
+                combined_height = required_height
+
+        # Assemble the module images into one single image.
+        base_image = pygame.surface.Surface((combined_width, combined_height))
         base_image = base_image.convert_alpha()
         base_image.fill((0, 0, 0, 0))
-        for ship_module in self._ship_modules:
-            base_image.blit(
-                ship_module.artist.get_image(0),
-                ship_module.pos,
-            )
+
+        # Draw all the modules onto the surface.
+        for pos, module in self._module_layout.items():
+            module_image = module.artist.get_image(0)
+            # Draw the image onto the surface.
+            base_image.blit(module_image, pos)
+
         self._base_image = base_image
         return
+
+    def _validate_pos(self, pos: tuple[float, float]) -> None:
+        """
+        Raise an error if the given position is not a valid key in the
+        `module_type_layout` attribute.
+
+        :param pos: Position to validate.
+        :type pos: tuple[float, float]
+        :raise ValueError: If the given position is not a valid key in
+            the `module_type_layout` attribute.
+        """
+        if self._module_type_layout.get(pos) is None:
+            raise ValueError(f'Invalid module position {pos}')
+        return
+
+    @property
+    def base_image(self) -> pygame.surface.Surface:
+        """
+        Return the base image.
+
+        :raise AttributeError: 
+        """
+        if hasattr(self, '_base_image') is False:
+            raise AttributeError(
+                'Base image has not been loaded. Call `load_base_image`' \
+                ' once before accessing this attribute.'
+            )
+        else:
+            return self._base_image

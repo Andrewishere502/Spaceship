@@ -1,15 +1,12 @@
 from pathlib import Path
 
-from pygame import Vector2
-
 from components import Artist
 
 
-class ShipModule:
+class BaseShipModule:
     def __init__(
         self,
         image_path: Path,
-        pos: Vector2,
         is_mirror_x: bool = False,
         is_mirror_y: bool = False,
     ) -> None:
@@ -27,10 +24,4 @@ class ShipModule:
             is_mirror_x=is_mirror_x,
             is_mirror_y=is_mirror_y,
         )
-        # Position/angle will remain constant.
-        self._pos = pos
         return
-
-    @property
-    def pos(self) -> Vector2:
-        return self._pos
