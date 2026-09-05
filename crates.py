@@ -92,8 +92,8 @@ class WeaponCrate(Crate):
         # Get any weapon in the spaceship's weapons array that is of
         # the exact same type as the weapon in this crate. Does not
         # include subclasses.
-        weapon_type_matches = [weapon for weapon in spaceship.weapons_array
-                             if type(weapon) == type(self.weapon)]
+        weapon_type_matches = [weapon for weapon in spaceship.weapon_system._weapons
+                               if type(weapon) == type(self.weapon)]
 
         if len(weapon_type_matches) > 0:
             # Refill all weapons of matching type in the spaceship's
@@ -103,6 +103,6 @@ class WeaponCrate(Crate):
         else:
             # If the weapon wasn't in the spaceship's weapons array,
             # add it.
-            spaceship.weapons_array.append(self.weapon)
+            spaceship.weapon_system._weapons.append(self.weapon)
 
         return

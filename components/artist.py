@@ -7,12 +7,30 @@ class Artist:
     def __init__(
         self,
         image_path: Path,
+        is_mirror_x: bool = False,
+        is_mirror_y: bool = False,
         is_convert_alpha: bool = True,
     ) -> None:
+        """
+
+        :param image_path: Path to the image to load.
+        :type image_path: Path
+        :param is_mirror_x: `True` to mirror the image along the x-axis,
+            `False` not to.
+        :type is_mirror_x: bool, default `False`
+        :param is_mirror_y: `True` to mirror the image along the y-axis,
+            `False` not to.
+        :type is_mirror_y: bool, default `False`
+        :param is_convert_alpha: Whether to enable the alpha channel in
+            the loaded image.
+        :type is_convert_alpha: bool, default `True`
+        """
 
         self.set_base_image(
             image_path,
-            is_convert_alpha
+            is_mirror_x,
+            is_mirror_y,
+            is_convert_alpha,
         )
         return
 
@@ -51,6 +69,8 @@ class Artist:
     def set_base_image(
         self,
         image_path: Path,
+        is_mirror_x: bool = False,
+        is_mirror_y: bool = False,
         is_convert_alpha: bool = True,
     ) -> None:
         """
@@ -58,6 +78,12 @@ class Artist:
 
         :param image_path: Path to the image to load.
         :type image_path: Path
+        :param is_mirror_x: `True` to mirror the image along the x-axis,
+            `False` not to.
+        :type is_mirror_x: bool, default `False`
+        :param is_mirror_y: `True` to mirror the image along the y-axis,
+            `False` not to.
+        :type is_mirror_y: bool, default `False`
         :param is_convert_alpha: Whether to enable the alpha channel in
             the loaded image.
         :type is_convert_alpha: bool, default `True`
@@ -67,6 +93,12 @@ class Artist:
         # Enable the alpha channels if desired.
         if is_convert_alpha:
             base_image = base_image.convert_alpha()
+
+        base_image = pygame.transform.flip(
+            base_image,
+            is_mirror_y,
+            is_mirror_x,
+        )
 
         self._base_image = base_image
         return

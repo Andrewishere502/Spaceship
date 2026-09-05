@@ -1,3 +1,4 @@
+import random
 from pathlib import Path
 import tomllib
 from functools import partial
@@ -10,6 +11,17 @@ from space import Space
 from spaceship import Spaceship
 from controllers import (
     InputController,
+)
+from ship import (
+    ShipModule,
+    WeaponSystem,
+)
+from weapons import (
+    PhaseBlaster,
+    # PlasmaLauncher,
+    # IonFlak,
+    # AlloyCannon,
+    # IonRing,
 )
 
 
@@ -86,11 +98,80 @@ def make_spaceship(
     """
     Return a new spaceship instance.
     """
+    SPACESHIP_SPRITE_DIR = Path('Sprites/spaceships/small/')
+    WEAPON_SYSTEM_POS = Vector2(0, 0)
+    HEALTH = 10
+
+    body_module = ShipModule(
+        SPACESHIP_SPRITE_DIR / 'body.png',
+        # The body module sits in the very center of the chassis.
+        Vector2(0, 0),
+    )
+    left_wing_path = get_random_path(SPACESHIP_SPRITE_DIR / 'wings', '.png')
+    left_wing_module = ShipModule(
+        left_wing_path,
+        # The body module sits in the very center of the chassis.
+        Vector2(0, 0),
+    )
+    right_wing_module = ShipModule(
+        left_wing_path,
+        # The body module sits in the very center of the chassis.
+        Vector2(0, 24),
+        is_mirror_x=True,
+    )
+    nose_module = ShipModule(
+        get_random_path(SPACESHIP_SPRITE_DIR / 'heads', '.png'),
+        # The body module sits in the very center of the chassis.
+        Vector2(24, 8),
+    )
+    tail_module = ShipModule(
+        get_random_path(SPACESHIP_SPRITE_DIR / 'tails', '.png'),
+        # The body module sits in the very center of the chassis.
+        Vector2(0, 8),
+    )
+    weapon_system = WeaponSystem(
+        # Position relative to the chassis.
+        WEAPON_SYSTEM_POS,
+        # List of weapons the system contains.
+        [
+            PhaseBlaster(),
+            # PlasmaLauncher(),
+            # IonFlak(),
+            # AlloyCannon(),
+            # IonRing(),
+        ],
+    )
+
     spaceship = Spaceship(
-        initial_pos,
-        10,
+        width=32,
+        height=32,
+        initial_health=HEALTH,
+        max_health=HEALTH,
+        initial_pos=initial_pos,
+        body_module=body_module,
+        left_wing_module=left_wing_module,
+        right_wing_module=right_wing_module,
+        nose_module=nose_module,
+        tail_module=tail_module,
+        weapon_system=weapon_system,
     )
     return spaceship
+
+
+def get_random_path(base_dir: Path, allow_suffix: str) -> Path:
+    """
+    Return a random file with the provided suffix from the given base
+    directory.
+    """
+    return random.choice(
+        list(
+            filter(
+                lambda file_path: file_path.suffix == allow_suffix,
+                base_dir.iterdir(),
+            )
+        )
+    )
+
 
 
 # Maximum frames per second.
@@ -150,9 +231,9 @@ while run:
                     )
                 )
             elif event.key == pygame.K_e:
-                spaceship.next_weapon()
+                spaceship.weapon_system.next_weapon()
             elif event.key == pygame.K_q:
-                spaceship.prev_weapon()
+                spaceship.weapon_system.prev_weapon()
             elif event.key == pygame.K_p:
                 pause = not pause
             else:

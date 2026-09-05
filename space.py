@@ -555,7 +555,7 @@ class Space(pygame.surface.Surface):
                        IonRing()
                        ])
         weapon_choices = list(weapons.difference(
-                            set(self.spaceship.weapons_array)
+                            set(self.spaceship.weapon_system._weapons)
                             ))
         weapon = random.choice(weapon_choices)
         crate = WeaponCrate(pos, vel, angular_pos, angular_vel, weapon)
