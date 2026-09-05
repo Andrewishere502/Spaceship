@@ -48,7 +48,7 @@ def get_keyboard_mapping(
     spaceship: Spaceship
 ) -> dict[int, Callable]:
     """
-
+    Return the keyboard controls mapping.
     """
     INPUT_MAPPING = {
         pygame.K_SPACE: space.spaceship_shoot,
@@ -88,6 +88,18 @@ def get_keyboard_mapping(
             spaceship.movement.apply_acceleration,
             Vector2(0.005, 0)
         ),
+    }
+    return INPUT_MAPPING
+
+
+def get_mouse_mapping(
+    space: Space,
+) -> dict[int, Callable]:
+    """
+    Return the mouse controls mapping.
+    """
+    INPUT_MAPPING = {
+        pygame.BUTTON_LEFT: space.spaceship_shoot,  # Mouse button left
     }
     return INPUT_MAPPING
 
@@ -202,12 +214,18 @@ spaceship = make_spaceship(
 )
 space.reset_game(spaceship)
 
-# Setup the spaceship controller.
-controller = InputController()
-controller.set_map(
+# Setup the spaceship keyboard and mouse input controllers.
+keyboard_controller = InputController()
+mouse_controller = InputController()
+keyboard_controller.set_map(
     get_keyboard_mapping(
         space,
         spaceship,
+    )
+)
+mouse_controller.set_map(
+    get_mouse_mapping(
+        space,
     )
 )
 
@@ -224,10 +242,15 @@ while run:
                     Vector2(space.get_rect().center),
                 )
                 space.reset_game(spaceship)
-                controller.set_map(
+                keyboard_controller.set_map(
                     get_keyboard_mapping(
                         space,
                         spaceship,
+                    )
+                )
+                mouse_controller.set_map(
+                    get_mouse_mapping(
+                        space,
                     )
                 )
             elif event.key == pygame.K_e:
@@ -237,22 +260,24 @@ while run:
             elif event.key == pygame.K_p:
                 pause = not pause
             else:
-                controller.send(event.key)
-
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if space.spaceship.is_alive:
-                buttons_down = pygame.mouse.get_pressed()
-                if buttons_down[0]:
-                    space.spaceship_shoot()
+                keyboard_controller.send(event.key)
 
     if spaceship.is_alive and not pause:
+        # For each mapped input on the keyboard, send it to the
+        # controller to activate the corresponding action if that key
+        # is pressed.
         keys_pressed = pygame.key.get_pressed()
-        # For each mapped input, send it to the controller if it's
-        # down (pressed).
-        for key in set(controller._input_map.keys()):
-            is_down = keys_pressed[key]
-            if is_down:
-                controller.send(key)
+        for keyboard_button_id in set(keyboard_controller._input_map.keys()):
+            if keys_pressed[keyboard_button_id]:
+                keyboard_controller.send(keyboard_button_id)
+        # For each mapped input on the mouse, send it to the controller
+        # to activate the corresponding action if that button is pressed.
+        mouse_pressed = pygame.mouse.get_pressed()
+        for mouse_button_id in set(mouse_controller._input_map.keys()):
+            # The index of the mouse button's state is its ID number
+            # minus one.
+            if mouse_pressed[mouse_button_id - 1]:
+                mouse_controller.send(mouse_button_id)
 
         # Point the spaceship at the mouse.
         mouse_pos = Vector2(*pygame.mouse.get_pos())
