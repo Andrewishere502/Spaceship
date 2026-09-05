@@ -12,16 +12,13 @@ from spaceship import Spaceship
 from controllers import (
     InputController,
 )
-from ship import (
-    BaseShipModule,
-    WeaponSystem,
-)
+from ship import WeaponSystem
 from weapons import (
     PhaseBlaster,
-    # PlasmaLauncher,
-    # IonFlak,
-    # AlloyCannon,
-    # IonRing,
+    PlasmaLauncher,
+    IonFlak,
+    AlloyCannon,
+    IonRing,
 )
 
 

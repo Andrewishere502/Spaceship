@@ -8,11 +8,11 @@ class AlloyCannon(BaseWeapon[AlloyProjectile]):
     def __init__(self):
         weapon_name = 'alloy cannon'
         image_name = 'alloy-cannon.png'
-        projectile_speed = 0.2
-        projectile_spread = 0
-        max_ammo = 100
+        projectile_speed = 0.25
+        projectile_spread = 8
+        max_ammo = 200
         ammo_per_use = 1
-        fire_rate = datetime.timedelta(milliseconds=100)
+        fire_rate = datetime.timedelta(milliseconds=130)
         super().__init__(
             weapon_name,
             image_name,

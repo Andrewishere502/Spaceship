@@ -13,7 +13,7 @@ class AlloyProjectile(BaseProjectile):
         initial_angle: float,
     ):
         DAMAGE = 1
-        TICK_LIFE = 100
+        TICK_LIFE = 200
 
         super().__init__(
             'alloy-projectile.png',
