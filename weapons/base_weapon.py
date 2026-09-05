@@ -74,6 +74,8 @@ class BaseWeapon[ProjectileType]:
         self.ammo_per_use = ammo_per_use
 
         self._cooldown_timer = CooldownTimer(fire_rate)
+        # Start the cooldown timer in the ready state.
+        self._cooldown_timer.start(is_ready=True)
         return
 
     def get_item_image(self, angle: float) -> pygame.surface.Surface:

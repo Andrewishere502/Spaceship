@@ -31,10 +31,12 @@ class BaseProjectile(Entity):
         )
 
         # How much to reduce an asteroid's size by.
-        self.damage = damage  
+        self.damage = damage
 
-        # 
+        # Use a cooldown timer to track the lifespan of the projectile.
+        # Start the lifespan as soon as it is initialized.
         self._lifespan_tracker = CooldownTimer(lifespan)
+        self._lifespan_tracker.start()
         return
 
     def get_is_done(self) -> bool:
@@ -46,5 +48,3 @@ class BaseProjectile(Entity):
         # timer has passed the threshold and thus the projectile has
         # reached the end of its lifespan.
         return self._lifespan_tracker.get_is_ready()
-
-    

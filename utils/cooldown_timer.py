@@ -17,7 +17,6 @@ class CooldownTimer:
         :type threshold: datetime.timedelta
         """
         self.__threshold = threshold
-        self.start()
         return
 
     def get_is_ready(
@@ -61,13 +60,19 @@ class CooldownTimer:
             reference_datetime = datetime.datetime.now()
         return reference_datetime - self.__started_at
 
-    def start(self) -> datetime.datetime:
+    def start(self, is_ready: bool = False) -> datetime.datetime:
         """
         Record the current timestamp as the new starting point for the
         timer.
 
+        :param is_ready: If `True`, start the cooldown timer in the
+            ready state. Otherwise, start the cooldown timer as not
+            ready.
+        :type is_ready: bool, default `False`
         :return: Timestamp set as the timer's new start.
         :rtype: datetime.datetime
         """
         self.__started_at = datetime.datetime.now()
+        if is_ready:
+            self.__started_at -= self.__threshold
         return self.__started_at
