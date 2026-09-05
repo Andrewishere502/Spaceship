@@ -103,6 +103,6 @@ class WeaponCrate(Crate):
         else:
             # If the weapon wasn't in the spaceship's weapons array,
             # add it.
-            spaceship.weapon_system._weapons.append(self.weapon)
+            spaceship.weapon_system.add_weapon(self.weapon)
 
         return
