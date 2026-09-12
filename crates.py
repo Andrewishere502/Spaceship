@@ -4,7 +4,7 @@ from entity import Entity
 from spaceship import Spaceship
 
 
-class Crate(Entity):
+class BaseCrate(Entity):
     MAX_VEL_COMPONENT = 0.05
     MAX_AVEL = 0.5
 
@@ -28,7 +28,7 @@ class Crate(Entity):
         return
 
 
-class HealthCrate(Crate):
+class HealthCrate(BaseCrate):
     def __init__(self, pos, vel, angular_pos, angular_vel):
         image_path = Path('Sprites', 'Crates', 'health-crate.png')
         super().__init__(image_path, pos, vel, angular_pos, angular_vel)
@@ -45,7 +45,7 @@ class HealthCrate(Crate):
         return
 
 
-class AmmoCrate(Crate):
+class AmmoCrate(BaseCrate):
     def __init__(self, pos, vel, angular_pos, angular_vel):
         image_path = Path('Sprites', 'Crates', 'ammo-crate.png')
         super().__init__(image_path, pos, vel, angular_pos, angular_vel)
@@ -62,7 +62,7 @@ class AmmoCrate(Crate):
         return
 
 
-class WeaponCrate(Crate):
+class WeaponCrate(BaseCrate):
     def __init__(
         self,
         pos,
