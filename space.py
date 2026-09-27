@@ -7,7 +7,6 @@ from queue import PriorityQueue
 import pygame
 from pygame import Vector2
 
-from entity import Entity
 from event import Event
 from asteroid import Asteroid
 from spaceship import Spaceship
@@ -364,15 +363,27 @@ class Space(pygame.surface.Surface):
         self.write_small(text, (20, 110, 8), pos)
         return
 
-    def draw_entity(self, entity: Entity) -> None:
-        image = entity.get_image()
-        rect = entity.get_image().get_rect(center=entity.movement.get_pos())
-        self.blit(image, rect)
-        return
-
     def draw_effects(self):
         for effect in self.effects:
             self.blit(effect.get_frame(), effect.pos)
+        return
+
+    def draw_image(
+        self,
+        image: pygame.Surface,
+        pos: Vector2,
+    ) -> None:
+        """
+        Draw the given image with its center on the given position.
+
+        :param image: Image to draw
+        :type image: pygame.Surface
+        :param pos: Desired position to draw the image, aligned to the
+            image's center.
+        :type pos: Vector2
+        """
+        rect = image.get_rect(center=pos)
+        self.blit(image, rect)
         return
 
     def draw_all(self):
@@ -381,16 +392,28 @@ class Space(pygame.surface.Surface):
         self.draw_overlay()
 
         for crate in self.crates:
-            self.draw_entity(crate)
+            self.draw_image(
+                crate.get_image(),
+                crate.movement.get_pos(),
+            )
 
         for asteroid in self.asteroids:
-            self.draw_entity(asteroid)
+            self.draw_image(
+                asteroid.get_image(),
+                asteroid.movement.get_pos(),
+            )
 
         if self.spaceship.is_alive:
-            self.draw_entity(self.spaceship)
+            self.draw_image(
+                self.spaceship.get_image(),
+                self.spaceship.movement.get_pos(),
+            )
 
         for projectile in self.projectiles:
-            self.draw_entity(projectile)
+            self.draw_image(
+                projectile.get_image(),
+                projectile.movement.get_pos(),
+            )
 
         self.draw_effects()
         return
