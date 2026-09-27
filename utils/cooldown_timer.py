@@ -60,6 +60,24 @@ class CooldownTimer:
             reference_datetime = datetime.datetime.now()
         return reference_datetime - self.__started_at
 
+    def get_timedelta_ratio(
+        self,
+        reference_datetime: datetime.datetime | None = None
+    ) -> float:
+        """
+        Return the ratio of the time elapsed to the total time required
+        to reset the cool down.
+
+        :param reference_datetime: Some datetime. Set to the current
+            datetime if `None`.
+        :type reference_datetime: datetime.datetime | None, default
+            `None`
+        :return: Ratio of the time elapsed to the total time required
+            to reset the cool down.
+        :rtype: datetime.timedelta
+        """
+        return self.get_timedelta(reference_datetime=reference_datetime) / self.__threshold
+
     def start(self, is_ready: bool = False) -> datetime.datetime:
         """
         Record the current timestamp as the new starting point for the
@@ -76,3 +94,14 @@ class CooldownTimer:
         if is_ready:
             self.__started_at -= self.__threshold
         return self.__started_at
+
+    @property
+    def is_started(self) -> bool:
+        """
+        Return `True` if the `start` method has been called on this
+        timer instance, otherwise return `False`.
+
+        :return: `True` if started, otherwise `False`.
+        :rtype: bool
+        """
+        return hasattr(self, '__started_at')

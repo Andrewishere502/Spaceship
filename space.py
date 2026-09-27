@@ -1,10 +1,14 @@
 import random
 import math
+import datetime
+from functools import partial
+from queue import PriorityQueue
 
 import pygame
 from pygame import Vector2
 
 from entity import Entity
+from event import Event
 from asteroid import Asteroid
 from spaceship import Spaceship
 from projectiles import BaseProjectile
@@ -15,8 +19,13 @@ from weapons import (
     AlloyCannon,
     IonRing
 )
-from crates import HealthCrate, AmmoCrate, WeaponCrate
+from crates import (
+    HealthCrate,
+    AmmoCrate,
+    WeaponCrate,
+)
 from effects import Explosion
+from level import Level
 
 
 class Space(pygame.surface.Surface):
@@ -28,8 +37,46 @@ class Space(pygame.surface.Surface):
     ) -> None:
         super().__init__((width, height))
 
+        # Reset all the lists tracking game objects.
+        self.projectiles: list[BaseProjectile] = []
+        self.asteroids: list[Asteroid] = []
+        self.crates: list[HealthCrate | AmmoCrate | WeaponCrate] = []
+        self.effects = []
+
+        # Use a priority queue to store events so we can easily manage
+        # their order.
+        self._events_queue = PriorityQueue[Event]()
+
         self.font_big = pygame.font.SysFont('arial', 200)
         self.font_small = pygame.font.SysFont('arial', 50)
+
+        # Define the actions the level will be able use to challenge
+        # the player.
+        self._challenge_actions = [
+            partial(self.spawn_asteroid, 2),
+            partial(self.spawn_asteroid, 3),
+            partial(self.spawn_asteroid, 4),
+            partial(self.spawn_asteroid, 5),
+        ]
+        self._challenge_action_costs = [
+            1,
+            2,
+            4,
+            8,
+        ]
+
+        # Define the actions the level will be able use to support
+        # the player.
+        self._support_actions = [
+            partial(self.spawn_crate, AmmoCrate),
+            partial(self.spawn_crate, HealthCrate),
+            partial(self.spawn_crate, WeaponCrate),
+        ]
+        self._support_action_costs = [
+            3,
+            5,
+            10,
+        ]
 
         self._is_asteroids_do_damage = is_asteroids_do_damage
         return
@@ -41,21 +88,33 @@ class Space(pygame.surface.Surface):
         """
         Reset the game.
         """
-        self.level_tick_durration = 0
-        self.level = 1
-        self.ticks_until_asteroid = self.ticks_per_asteroid
+        # NOTE: Level parameters will eventually be more dynamic, but
+        # I'll tackle that logic after implementing the new level
+        # system.
+        LEVEL_DURATION = datetime.timedelta(seconds=10)
+        LEVEL_CHALLENGE_POINTS = 5
+        LEVEL_SUPPORT_POINTS = 2
 
+        self._tick_num = 1
+        self._events_queue = PriorityQueue[Event]()
+        self.projectiles.clear()
+        self.asteroids.clear()
+        self.crates.clear()
+        self.effects.clear()
+
+        # Set the spaceship object.
         self.set_spaceship(spaceship)
-        self.projectiles: list[BaseProjectile] = []
 
-        self.asteroids: list[Asteroid] = []
-        start_asteroids = 3
-        for _ in range(start_asteroids):
-            self.spawn_asteroid()
-
-        self.crates: list[HealthCrate | AmmoCrate | WeaponCrate] = []
-
-        self.effects = []
+        # Reset the level.
+        self._level = Level(
+            1,
+            LEVEL_DURATION,
+            LEVEL_CHALLENGE_POINTS,
+            LEVEL_SUPPORT_POINTS,
+        )
+        self.init_level_events()
+        # Start the level.
+        self._level.start()
         return
 
     def set_spaceship(self, spaceship: Spaceship) -> None:
@@ -63,59 +122,93 @@ class Space(pygame.surface.Surface):
         return
 
     ##
+    # Event methods
+    ##
+
+    def init_level_events(self) -> None:
+        """
+        
+        """
+        # Generate the level events and add them to the event queue.
+        events = self._level.generate_events(
+            self._challenge_actions,
+            self._challenge_action_costs,
+            self._support_actions,
+            self._support_action_costs,
+        )
+        for event in events:
+            self._events_queue.put(event)
+        return
+
+    def get_next_event(self) -> Event | None:
+        """
+        If the next event in the queue is ready to be triggered, return
+        it. If the next event is not ready to be triggered, or there
+        are no events in the queue, return `None`.
+
+        :return: The next event in the event queue, preceded by its
+            priority. If there are no events on the queue, return
+            `None`.
+        :rtype: Event | None
+        """
+        # NOTE: Checking the number of `unfinished_tasks` makes this
+        # function about 8 times faster than calling `get_nowait` and
+        # catching the `Empty` error raised if the queue is empty.
+        #
+        # If we call the queue's `get_nowait` method while it's empty
+        # then it'll throw an error, so make sure it's not empty before
+        # doing so.
+        if self._events_queue.unfinished_tasks > 0:
+            # Get the next event from the queue immediately. Since
+            # we're getting a "task" from the queue we have to
+            # explicitly notify the queue of this or the number of
+            # unfinished tasks will never decrease.
+            event = self._events_queue.get_nowait()
+            self._events_queue.task_done()
+
+            # If event should not be triggered, add it back to the
+            # queue. Otherwise return it and return `None` since no
+            # event is ready to be triggered.
+            if event.timestamp > self._level.get_time_elapsed():
+                # This will automatically add one to the number of
+                # unfinished "tasks" in the queue.
+                self._events_queue.put(event)
+                return None
+            else:
+                return event
+        return None
+
+    ##
     # Level methods
     ##
 
-    @property
-    def asteroids_per_level(self):
-        """Return an integer that represents the number of additional
-        asteroids the game should spawn each level.
-        """
-        m = 1.2  # the increase in asteroids per level per level
-        b = 2  # asteroids on the first level
-        return round(m * (self.level - 1) + b)
+    def increment_tick(self) -> None:
+        # If the level is complete then increment the level counter.
+        if self._level.get_is_complete():
+            self.increment_level()
 
-    @property
-    def ticks_per_asteroid(self):
-        base_ticks_per_asteroid = 70
-        if self.level <= 10:
-            return base_ticks_per_asteroid
-        else:
-            return base_ticks_per_asteroid - self.level + 10
+        # Process events from the queue.
+        event = self.get_next_event()
+        if event is not None:
+            event()
 
-    @property
-    def ticks_per_level(self):
-        return self.asteroids_per_level * self.ticks_per_asteroid
-
-    def increment_tick(self):
-        self.level_tick_durration += 1
-        if self.level_tick_durration >= self.ticks_per_level:
-            self.next_level()
-
-        self.ticks_until_asteroid -= 1
-        if self.ticks_until_asteroid == 0:
-            self.spawn_asteroid()
-            self.ticks_until_asteroid = self.ticks_per_asteroid
+        self._tick_num += 1
         return
 
-    def next_level(self):
-        self.level += 1
-        self.level_tick_durration = 1
-
-        # 1/7 chance to spawn weapon crate
-        do_spawn_weapon_crate = not random.randint(0, 6)
-        if do_spawn_weapon_crate:
-            self.spawn_crate(WeaponCrate)
-
-        # spawn a crate every 2 levels.
-        if self.level % 2 == 0:
-            # give ammo to the player every 2 levels
-            self.spawn_crate(AmmoCrate)
-
-            # 2/3 chance to spawn a health crate
-            do_spawn_health_crate = random.randint(0, 2)
-            if do_spawn_health_crate:
-                self.spawn_crate(HealthCrate)
+    def increment_level(self) -> None:
+        # Setup parameters used to initialize the next level object.
+        level_duration = self._level.level_duration + datetime.timedelta(seconds=10)
+        challenge_points = self._level.challenge_points + 4
+        support_points = self._level.support_points + 1
+        # Create the next level instance.
+        self._level.next_level(
+            level_duration,
+            challenge_points,
+            support_points,
+        )
+        self.init_level_events()
+        # Start the level.
+        self._level.start()
         return
 
     ##
@@ -205,7 +298,8 @@ class Space(pygame.surface.Surface):
             )
         )
 
-        level_progress_ratio = self.level_tick_durration / self.ticks_per_level
+        # This value is already clipped to between 0 and 1.0.
+        level_progress_ratio = self._level.get_progress_ratio()
         if level_progress_ratio > 0:
             pygame.draw.rect(
                 self,
@@ -254,7 +348,7 @@ class Space(pygame.surface.Surface):
             OVERLAY_PADY,
         )
 
-        text = str(self.level)
+        text = str(self._level.level_num)
         pos = self.text_to_center_point(text, self.font_big, (self.get_width() // 2, self.get_height() // 2))
         self.write_big(text, (72, 66, 84), pos)
 
@@ -300,8 +394,6 @@ class Space(pygame.surface.Surface):
 
         self.draw_effects()
         return
-
-    # def draw_rect
 
     ##
     # Misc methods
@@ -455,7 +547,10 @@ class Space(pygame.surface.Surface):
     # Asteroid methods
     ##
 
-    def spawn_asteroid(self):
+    def spawn_asteroid(
+        self,
+        size: int,
+    ) -> None:
         # Maximum magnitude of velocity is 0.1.
         MAX_SPEED = 0.1
 
@@ -472,8 +567,6 @@ class Space(pygame.surface.Surface):
         ).rotate(
             angle
         )
-
-        size = random.randint(2, 3)
 
         asteriod = Asteroid(
             Vector2(rand_x, rand_y),
